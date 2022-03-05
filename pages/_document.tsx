@@ -56,8 +56,6 @@ export default function Document() {
         <script src="dist/js/adminlte.js" defer></script>
 
         <script src="dist/js/demo.js" defer></script>
-
-        <script src="dist/js/dashboard.js" defer></script>
       </Head>
       <body>
         <Main />

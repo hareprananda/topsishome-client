@@ -1613,7 +1613,6 @@
         var windowHeight = $__default["default"](window).height();
         var navbarHeight = $__default["default"](SELECTOR_TAB_NAV).outerHeight();
         $__default["default"](SELECTOR_TAB_EMPTY + ", " + SELECTOR_TAB_LOADING + ", " + SELECTOR_CONTENT_IFRAME).height(windowHeight - navbarHeight);
-        $__default["default"](SELECTOR_CONTENT_WRAPPER).height(windowHeight);
       } else {
         var contentWrapperHeight = parseFloat($__default["default"](SELECTOR_CONTENT_WRAPPER).css('height'));
 
