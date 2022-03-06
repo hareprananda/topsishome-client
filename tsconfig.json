@@ -21,7 +21,8 @@
       "const/*": ["src/const/*"],
       "components/*": ["src/components/*"],
       "styles/*": ["src/styles/*"]
-    }
+    },
+    "removeComments": true
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", "next.config.js"],
   "exclude": ["node_modules"]
