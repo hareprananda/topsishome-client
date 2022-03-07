@@ -15,7 +15,6 @@ const Home: NextPageWithLayout = () => {
   const dispatch = useAppDispatch()
   useEffect(() => {
     dispatch(ReducerActions.ui.setTitle('Home'))
-    dispatch(ReducerActions.account.setAccount({ name: 'Roy Mahardika' }))
     setOpenWelcomeModal(true)
   }, [])
 
