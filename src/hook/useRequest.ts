@@ -1,11 +1,15 @@
-import axios, { AxiosPromise, AxiosRequestConfig } from 'axios'
+import axios, { AxiosPromise, AxiosRequestConfig, AxiosError } from 'axios'
 import LocalStorage from 'src/helper/LocalStorage'
+import { useRouter } from 'next/router'
+import { Route } from 'src/const/Route'
 
 interface DefaultRes {
   data: string
 }
 
 const useRequest = () => {
+  const router = useRouter()
+
   const authReq = <T = DefaultRes>(config: AxiosRequestConfig) => {
     const accessToken = LocalStorage.get('user').access_token
     return axios({
@@ -13,8 +17,14 @@ const useRequest = () => {
       headers: {
         Authorization: 'Bearer ' + accessToken,
       },
-    }) as AxiosPromise<T>
+    })
+      .then(res => res)
+      .catch((err: AxiosError) => {
+        router.push(Route.Login)
+        if (err.response?.status === 401) throw err
+      }) as AxiosPromise<T>
   }
+
   const req = <T = DefaultRes>(config: AxiosRequestConfig) => {
     return axios(config) as AxiosPromise<T>
   }

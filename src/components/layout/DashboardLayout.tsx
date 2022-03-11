@@ -1,25 +1,60 @@
 /* eslint-disable @next/next/no-img-element */
 import { useRouter } from 'next/router'
 import { NextPageWithLayout } from 'pages/_app'
-import React, { ReactElement, useEffect } from 'react'
+import React, { ReactElement, useEffect, useState } from 'react'
 import { useAppDispatch, useAppSelector } from 'src/hook/useRedux'
-import ReducerActions from 'src/redux/ReducerAction'
 import Link from 'next/link'
 import { Route } from 'src/const/Route'
+import LocalStorage from 'src/helper/LocalStorage'
+import useRequest from 'src/hook/useRequest'
+import { API_ENDPOINT } from 'src/const/Global'
+import ReducerActions from 'src/redux/ReducerAction'
+import Modal from 'src/components/modal/Modal'
+
+interface MeResponse {
+  _id: string
+  name: string
+  level: 'user' | 'administrator'
+}
 
 const DashboardLayout: React.FC = ({ children }) => {
   const router = useRouter()
-  const dispatch = useAppDispatch()
+  const [openWelcomeModal, setOpenWelcomeModal] = useState(false)
   const title = useAppSelector(state => state.ui.title)
   const account = useAppSelector(state => state.account)
+  const dispatch = useAppDispatch()
+  const { authReq } = useRequest()
 
   const isMenuActive = (menuUrl: string) => {
     return menuUrl === router.pathname ? 'active' : ''
   }
 
   useEffect(() => {
-    dispatch(ReducerActions.account.setAccount({ name: 'Roy Mahardika' }))
+    dispatch(ReducerActions.ui.masterLoader(true))
+    authReq<MeResponse>({
+      url: `${API_ENDPOINT}/api/me`,
+    })
+      .then(res => {
+        dispatch(
+          ReducerActions.account.setAccount({
+            level: res.data.level,
+            name: res.data.name,
+          })
+        )
+        const homeDashboardRegex = new RegExp(Route.Home + '$', 'g')
+        if (homeDashboardRegex.test(router.pathname)) setOpenWelcomeModal(true)
+      })
+      .catch(() => null)
+      .finally(() => dispatch(ReducerActions.ui.masterLoader(false)))
   }, [])
+
+  if (typeof window !== 'undefined') {
+    const storage = LocalStorage.get('user')
+    if (!storage?.access_token) {
+      router.push(Route.Login)
+      return null
+    }
+  }
 
   return (
     <div className='wrapper'>
@@ -140,6 +175,16 @@ const DashboardLayout: React.FC = ({ children }) => {
           <strong>Copyright &copy; {new Date().getFullYear()}</strong> Roy Mahardika
         </p>
       </footer>
+      <Modal
+        open={openWelcomeModal}
+        size='lg'
+        title='Selamat Datang di SPK Bantuan Bedah rumah'
+        setOpen={setOpenWelcomeModal}>
+        <p>
+          Dalam upaya membantu masyarakat miskin, Pemerintah kabupaten Badung merancang program rumah layak huni agar
+          masyarakat Kabupaten Badung mendapatkan rumah yang layak dan mensejahterakan masyarakat kabupaten badung
+        </p>
+      </Modal>
     </div>
   )
 }
