@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import withAuthLayout from 'src/components/layout/AuthLayout'
 import { Route } from 'src/const/Route'
 import { useAppDispatch } from 'src/hook/useRedux'
