@@ -27,25 +27,25 @@ const Modal: React.FC<Props> = ({ open, title, children, size, setOpen }) => {
   return (
     <>
       <button
-        type="button"
+        type='button'
         ref={buttonRef}
-        data-toggle="modal"
+        data-toggle='modal'
         data-target={`#${modalId}`}
         style={{ display: 'none' }}
       />
 
-      <div className="modal fade" id={modalId} tabIndex={-1} role="dialog" aria-hidden="true">
-        <div className={`modal-dialog modal-${size}`} role="document">
-          <div className="modal-content">
-            <div className="modal-header">
-              <h5 className="modal-title">{title}</h5>
-              <button type="button" className="close" onClick={() => setOpen(!open)} aria-label="Close">
-                <span aria-hidden="true">&times;</span>
+      <div className='modal fade' id={modalId} tabIndex={-1} role='dialog' aria-hidden='true'>
+        <div className={`modal-dialog modal-${size}`} role='document'>
+          <div className='modal-content'>
+            <div className='modal-header'>
+              <h5 className='modal-title'>{title}</h5>
+              <button type='button' className='close' onClick={() => setOpen(!open)} aria-label='Close'>
+                <span aria-hidden='true'>&times;</span>
               </button>
             </div>
-            <div className="modal-body">{children}</div>
-            <div className="modal-footer">
-              <button type="button" className="btn btn-secondary" onClick={() => setOpen(!open)}>
+            <div className='modal-body'>{children}</div>
+            <div className='modal-footer'>
+              <button type='button' className='btn btn-secondary' onClick={() => setOpen(!open)}>
                 Close
               </button>
             </div>

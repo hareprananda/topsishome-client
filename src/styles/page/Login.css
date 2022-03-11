@@ -1,0 +1,16 @@
+.auth__form-group {
+  margin: 15px 0;
+}
+
+.auth__form-group label {
+  display: block;
+  margin-top: 7px;
+  text-transform: uppercase;
+}
+
+.auth__error-text {
+  color: var(--error);
+  margin: 0;
+  transform: translate(0px, -14px);
+  font-size: 13px;
+}

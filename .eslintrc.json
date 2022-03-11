@@ -9,5 +9,6 @@
     "no-alert": "warn",
     "@typescript-eslint/no-unused-vars": "error",
     "no-unescaped-entities": "off"
-  }
+  },
+  "ignorePatterns": ["node_modules"]
 }

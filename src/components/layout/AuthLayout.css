@@ -1,0 +1,29 @@
+.auth__container {
+  display: flex;
+  width: 100vw;
+  height: 100vh;
+}
+.auth__image {
+  flex: auto;
+  height: 100vh;
+  background-repeat: no-repeat;
+  background-size: cover;
+  background: url('/dist/img/login-bg.jpg');
+}
+.auth__image::after {
+  content: '';
+  background-color: rgba(0, 0, 0, 0.3);
+  position: absolute;
+  z-index: 1;
+  left: 0;
+  top: 0;
+  height: 100%;
+  width: 100%;
+}
+.auth__content {
+  padding: 50px;
+  z-index: 2;
+  width: 45vw;
+  max-width: 570px;
+  background-color: white;
+}

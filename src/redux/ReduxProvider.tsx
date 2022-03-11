@@ -12,6 +12,10 @@ const reducer = (Object.keys(RegisterReducer) as (keyof typeof RegisterReducer)[
 
 const store = configureStore({
   reducer,
+  middleware: getDefaultMiddleware =>
+    getDefaultMiddleware({
+      serializableCheck: false,
+    }),
 })
 
 const ReduxProvider: React.FC = ({ children }) => {

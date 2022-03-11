@@ -1,6 +1,6 @@
 /** @type {import('next').NextConfig} */
-const ESLintPlugin = require("eslint-webpack-plugin")
-const ESLintOption = require("./.eslintrc.json")
+const ESLintPlugin = require('eslint-webpack-plugin')
+const ESLintOption = require('./.eslintrc.json')
 const nextConfig = {
   reactStrictMode: true,
   webpack: (config, { dev }) => {
@@ -8,6 +8,16 @@ const nextConfig = {
       config.plugins.push(new ESLintPlugin({ overrideConfig: ESLintOption }))
     }
     return config
+  },
+
+  async redirects() {
+    return [
+      {
+        source: '/',
+        destination: '/dashboard',
+        permanent: true,
+      },
+    ]
   },
 }
 

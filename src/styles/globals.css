@@ -1,9 +1,14 @@
+:root {
+  --border: rgba(0, 0, 0, 0.16);
+  --error: red;
+}
+
 html,
 body {
   padding: 0;
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen,
-    Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen, Ubuntu, Cantarell, Fira Sans, Droid Sans,
+    Helvetica Neue, sans-serif;
 }
 
 a {
@@ -14,3 +19,14 @@ a {
 * {
   box-sizing: border-box;
 }
+/* page */
+@import 'page/Login.css';
+
+/* layout */
+@import '../components/layout/AuthLayout.css';
+
+/* loader */
+@import '../components/loader/MasterLoader/MasterLoader.css';
+
+/* modal */
+@import '../components/modal/StatusModal.css';
