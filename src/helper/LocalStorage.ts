@@ -14,7 +14,7 @@ const LocalStorage = () => {
   }
 
   const get = <T extends keyof TLocalStorage>(key: T) => {
-    return JSON.parse(localStorage.getItem(key) as string)
+    return JSON.parse(localStorage.getItem(key) as string) as TLocalStorage[T]
   }
 
   return { save, clear, get }
