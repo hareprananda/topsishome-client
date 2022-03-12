@@ -29,4 +29,4 @@ a {
 @import '../components/loader/MasterLoader/MasterLoader.css';
 
 /* modal */
-@import '../components/modal/StatusModal.css';
+@import '../components/modal/StatusConfirmationModal.css';

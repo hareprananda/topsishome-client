@@ -11,7 +11,7 @@ const useRequest = () => {
   const router = useRouter()
 
   const authReq = <T = DefaultRes>(config: AxiosRequestConfig) => {
-    const accessToken = LocalStorage.get('user').access_token
+    const accessToken = LocalStorage.get('user')?.access_token
     return axios({
       ...config,
       headers: {
