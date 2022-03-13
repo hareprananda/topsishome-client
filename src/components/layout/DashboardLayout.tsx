@@ -48,6 +48,11 @@ const DashboardLayout: React.FC = ({ children }) => {
       .finally(() => dispatch(ReducerActions.ui.masterLoader(false)))
   }, [])
 
+  const onLogout = () => {
+    LocalStorage.clear('user')
+    router.push(Route.Login)
+  }
+
   if (typeof window !== 'undefined') {
     const storage = LocalStorage.get('user')
     if (!storage?.access_token) {
@@ -82,12 +87,12 @@ const DashboardLayout: React.FC = ({ children }) => {
                 <p>Ubah Password</p>
               </a>
               <div className='dropdown-divider'></div>
-              <a href='#' className='dropdown-item d-flex align-items-center'>
+              <div style={{ cursor: 'pointer' }} onClick={onLogout} className='dropdown-item d-flex align-items-center'>
                 <div style={{ width: '28px' }}>
                   <i className='fas fa-sign-out-alt'></i>
                 </div>
                 <p>Logout</p>
-              </a>
+              </div>
             </div>
           </li>
         </ul>

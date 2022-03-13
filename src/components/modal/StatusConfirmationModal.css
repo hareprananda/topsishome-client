@@ -6,7 +6,8 @@
 }
 #status-modal .modal-body i,
 #confirmation-modal .modal-body i {
-  font-size: 70px;
+  font-size: 100px;
+  margin-top: 20px;
 }
 #status-modal .modal-body button,
 #confirmation-modal .modal-body button {

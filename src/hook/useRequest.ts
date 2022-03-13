@@ -20,8 +20,8 @@ const useRequest = () => {
     })
       .then(res => res)
       .catch((err: AxiosError) => {
-        router.push(Route.Login)
-        if (err.response?.status === 401) throw err
+        if (err.response?.status === 401) router.push(Route.Login)
+        throw err
       }) as AxiosPromise<T>
   }
 
