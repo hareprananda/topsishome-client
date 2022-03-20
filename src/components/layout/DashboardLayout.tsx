@@ -154,6 +154,16 @@ const DashboardLayout: React.FC = ({ children }) => {
                   </a>
                 </Link>
               </li>
+              {account.level === 'administrator' && (
+                <li className='nav-item'>
+                  <Link href={Route.UserAccess}>
+                    <a className={`nav-link ${isMenuActive(Route.UserAccess)}`}>
+                      <i className='nav-icon fas fa-users'></i>
+                      <p>Akses Pengguna</p>
+                    </a>
+                  </Link>
+                </li>
+              )}
             </ul>
           </nav>
         </div>

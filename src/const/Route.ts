@@ -8,4 +8,5 @@ export const Route = {
   Criteria: '/dashboard/criteria',
   Selection: '/dashboard/selection',
   Result: '/dashboard/result',
+  UserAccess: '/dashboard/user',
 } as const
