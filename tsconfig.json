@@ -20,7 +20,8 @@
       "src/*": ["src/*"],
       "const/*": ["src/const/*"],
       "components/*": ["src/components/*"],
-      "styles/*": ["src/styles/*"]
+      "styles/*": ["src/styles/*"],
+      "request/*": ["src/request/*"]
     },
     "removeComments": true
   },

@@ -9,7 +9,7 @@ import { Pagination } from 'src/types/Global'
 import Link from 'next/link'
 import { Route } from 'src/const/Route'
 
-export interface Pengajuan {
+export interface SinglePengajuanList {
   _id: string
   alamat: string
   status: string
@@ -25,7 +25,7 @@ export interface Pengajuan {
 const Alternative: NextPageWithLayout = () => {
   const dispatch = useAppDispatch()
   const { authReq } = useRequest()
-  const [alternativeList, setAlternativeList] = useState<Pengajuan[]>([])
+  const [alternativeList, setAlternativeList] = useState<SinglePengajuanList[]>([])
   const [metaData, setMetaData] = useState({
     currentPage: 1,
     maxPage: 1,
@@ -42,7 +42,7 @@ const Alternative: NextPageWithLayout = () => {
 
   const fetchAlternative = () => {
     dispatch(ReducerActions.ui.masterLoader(true))
-    authReq<{ data: Pagination<Pengajuan[]> }>({
+    authReq<{ data: Pagination<SinglePengajuanList[]> }>({
       method: 'GET',
       url: API_ENDPOINT + '/api/pengajuan',
       params: {
@@ -99,7 +99,7 @@ const Alternative: NextPageWithLayout = () => {
     })
   }
 
-  const deleteConfirmation = (pengajuan: Pengajuan) => {
+  const deleteConfirmation = (pengajuan: SinglePengajuanList) => {
     dispatch(
       ReducerActions.ui.setConfirmationmodal({
         title: 'Are you sure?',

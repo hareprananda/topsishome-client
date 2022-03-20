@@ -1,31 +1,63 @@
 import { AxiosError } from 'axios'
-import { Pengajuan } from 'pages/dashboard/alternative'
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { API_ENDPOINT } from 'src/const/Global'
 import { useAppDispatch } from 'src/hook/useRedux'
 import useRequest from 'src/hook/useRequest'
 import ReducerActions from 'src/redux/ReducerAction'
+import { Criteria } from 'request/criteria/Criteria.model'
+import CriteriaConfig from 'src/request/criteria/CriteriaConfig'
 
-interface Props {
-  pengajuan?: Pengajuan
-  setPengajuan?: (data: Pengajuan) => void
+export interface PengajuanDetail {
+  _id: string
+  alamat: string
+  status: string
+  jenisKelamin: string
+  umur: number
+  pekerjaan: string
+  nama: string
+  criteria: {
+    id: string
+    name: string
+    value: number
+  }[]
 }
+interface Props {
+  pengajuan?: PengajuanDetail
+  setPengajuan?: (data: PengajuanDetail) => void
+}
+
 const AlternativeForm: React.FC<Props> = ({ pengajuan, setPengajuan }) => {
-  const { register, handleSubmit, formState, reset: resetForm } = useForm<Pengajuan>()
+  const { register, handleSubmit, formState, reset: resetForm } = useForm<Record<string, any>>()
   const { errors } = formState
   const { authReq } = useRequest()
   const dispatch = useAppDispatch()
+  const [allCriteria, setAllCriteria] = useState<(Omit<Criteria, '_id'> & { id: string })[]>([])
 
   const onSubmit = handleSubmit(data => {
     const mode = pengajuan ? 'update' : 'add'
     const method = mode == 'add' ? 'POST' : 'PUT'
     const url = `${API_ENDPOINT}/api/pengajuan` + (mode == 'add' ? '' : '/' + pengajuan?._id)
+    const { nama, alamat, jenisKelamin, pekerjaan, status, umur, ...criteria } = data
+    const criteriaPayload = Object.keys(criteria).map(key => ({
+      id: key.replace(/^criteria/g, ''),
+      value: data[key],
+    }))
+    const payload = {
+      nama,
+      alamat,
+      jenisKelamin,
+      pekerjaan,
+      status,
+      umur,
+      criteria: criteriaPayload,
+    }
+
     dispatch(ReducerActions.ui.masterLoader(true))
-    authReq<{ data: Pengajuan }>({
+    authReq<{ data: PengajuanDetail }>({
       method,
       url,
-      data,
+      data: payload,
     })
       .then(res => {
         setPengajuan?.(res.data.data)
@@ -46,9 +78,32 @@ const AlternativeForm: React.FC<Props> = ({ pengajuan, setPengajuan }) => {
       })
   })
 
+  useEffect(() => {
+    if (pengajuan === undefined) {
+      authReq<{ data: Criteria[] }>(CriteriaConfig.get()).then(res => {
+        setAllCriteria(res.data.data.map(({ _id, bobot, keterangan, name }) => ({ id: _id, bobot, keterangan, name })))
+      })
+    }
+    if (!pengajuan || Object.keys(pengajuan).length === 0) return
+    const { nama, alamat, jenisKelamin, pekerjaan, status, umur, criteria } = pengajuan
+    const criteriaForm = criteria.reduce((acc, cr) => {
+      acc[`criteria${cr.id}`] = cr.value
+      return acc
+    }, {} as Record<string, number>)
+    resetForm({
+      nama,
+      alamat,
+      jenisKelamin,
+      pekerjaan,
+      status,
+      umur,
+      ...criteriaForm,
+    })
+  }, [pengajuan])
   return (
     <div>
       <form onSubmit={onSubmit}>
+        <h4 className='text-left'>Informasi Personal</h4>
         <div className='row border-bottom align-middle' style={{ alignItems: 'center' }}>
           <div className='col-4 text-left p-3 font-weight-bold'>Nama :</div>
           <div className='col-8 text-left p-3'>
@@ -56,7 +111,6 @@ const AlternativeForm: React.FC<Props> = ({ pengajuan, setPengajuan }) => {
               type='text'
               className='form-control'
               placeholder='Nama...'
-              defaultValue={pengajuan?.nama || ''}
               {...register('nama', { required: true })}
             />
             {errors.nama && <small className='form-text text-danger'>Mohon isi nama dengan benar</small>}
@@ -69,7 +123,6 @@ const AlternativeForm: React.FC<Props> = ({ pengajuan, setPengajuan }) => {
               type='text'
               className='form-control'
               placeholder='Alamat...'
-              defaultValue={pengajuan?.alamat || ''}
               {...register('alamat', { required: true })}
             />
             {errors.alamat && <small className='form-text text-danger'>Mohon isi alamat dengan benar</small>}
@@ -80,7 +133,6 @@ const AlternativeForm: React.FC<Props> = ({ pengajuan, setPengajuan }) => {
           <div className='col-8 text-left p-3'>
             <select
               className='custom-select'
-              defaultValue={pengajuan?.jenisKelamin}
               {...register('jenisKelamin', { required: true, validate: value => !!value })}>
               <option value=''>Jenis Kelamin...</option>
               <option value='laki'>Laki laki</option>
@@ -92,76 +144,15 @@ const AlternativeForm: React.FC<Props> = ({ pengajuan, setPengajuan }) => {
           </div>
         </div>
         <div className='row border-bottom align-middle' style={{ alignItems: 'center' }}>
-          <div className='col-4 text-left p-3 font-weight-bold'>Kondisi Rumah :</div>
-          <div className='col-8 text-left p-3'>
-            <input
-              type='number'
-              defaultValue={pengajuan?.kondisiRumah}
-              className='form-control'
-              placeholder='Kondisi rumah...'
-              {...register('kondisiRumah', { required: true })}
-            />
-            {errors.kondisiRumah && (
-              <small className='form-text text-danger'>Mohon isi kondisi rumah dengan benar</small>
-            )}
-          </div>
-        </div>
-        <div className='row border-bottom align-middle' style={{ alignItems: 'center' }}>
-          <div className='col-4 text-left p-3 font-weight-bold'>Luas Tanah :</div>
-          <div className='col-8 text-left p-3'>
-            <div className='input-group'>
-              <input
-                type='number'
-                defaultValue={pengajuan?.luasTanah}
-                className='form-control'
-                placeholder='Luas tanah...'
-                {...register('luasTanah', { required: true })}
-              />
-              <div className='input-group-append'>
-                <span className='input-group-text' id='basic-addon2'>
-                  are
-                </span>
-              </div>
-            </div>
-            {errors.luasTanah && <small className='form-text text-danger'>Mohon isi luas tanah dengan benar</small>}
-          </div>
-        </div>
-        <div className='row border-bottom align-middle' style={{ alignItems: 'center' }}>
           <div className='col-4 text-left p-3 font-weight-bold'>Pekerjaan :</div>
           <div className='col-8 text-left p-3'>
             <input
               type='text'
               className='form-control'
-              defaultValue={pengajuan?.pekerjaan}
               placeholder='Pekerjaan...'
               {...register('pekerjaan', { required: true })}
             />
             {errors.pekerjaan && <small className='form-text text-danger'>Mohon isi pekerjaan dengan benar</small>}
-          </div>
-        </div>
-        <div className='row border-bottom align-middle' style={{ alignItems: 'center' }}>
-          <div className='col-4 text-left p-3 font-weight-bold'>Penghasilan :</div>
-          <div className='col-8 text-left p-3'>
-            <div className='input-group'>
-              <div className='input-group-append'>
-                <span className='input-group-text' id='basic-addon2'>
-                  Rp
-                </span>
-              </div>
-              <input
-                type='text'
-                className='form-control'
-                placeholder='Penghasilan...'
-                defaultValue={pengajuan?.penghasilan}
-                {...register('penghasilan', { required: true })}
-              />
-              <div className='input-group-append'>
-                <span className='input-group-text' id='basic-addon2'>
-                  / bulan
-                </span>
-              </div>
-            </div>
-            {errors.penghasilan && <small className='form-text text-danger'>Mohon isi penghasilan dengan benar</small>}
           </div>
         </div>
         <div className='row border-bottom align-middle' style={{ alignItems: 'center' }}>
@@ -171,7 +162,6 @@ const AlternativeForm: React.FC<Props> = ({ pengajuan, setPengajuan }) => {
               type='number'
               className='form-control'
               placeholder='Umur...'
-              defaultValue={pengajuan?.umur}
               {...register('umur', { required: true })}
             />
             {errors.umur && <small className='form-text text-danger'>Mohon isi usia dengan benar</small>}
@@ -180,10 +170,7 @@ const AlternativeForm: React.FC<Props> = ({ pengajuan, setPengajuan }) => {
         <div className='row align-middle' style={{ alignItems: 'center' }}>
           <div className='col-4 text-left p-3 font-weight-bold'>Status :</div>
           <div className='col-8 text-left p-3'>
-            <select
-              className='custom-select'
-              defaultValue={pengajuan?.status}
-              {...register('status', { required: true, validate: value => !!value })}>
+            <select className='custom-select' {...register('status', { required: true, validate: value => !!value })}>
               <option value=''>Status...</option>
               <option value='single'>Single</option>
               <option value='married'>Married</option>
@@ -191,6 +178,23 @@ const AlternativeForm: React.FC<Props> = ({ pengajuan, setPengajuan }) => {
             {errors.status && <small className='form-text text-danger'>Mohon isi status dengan benar</small>}
           </div>
         </div>
+        <h4 className='text-left mt-4'>Informasi Kriteria</h4>
+        {(pengajuan ? pengajuan?.criteria : allCriteria)?.map(criteria => (
+          <div className='row border-bottom align-middle' style={{ alignItems: 'center' }} key={criteria.id}>
+            <div className='col-4 text-left p-3 font-weight-bold'>{criteria.name} :</div>
+            <div className='col-8 text-left p-3'>
+              <input
+                type='number'
+                className='form-control'
+                placeholder={criteria.name + '...'}
+                {...register(`criteria${criteria.id}`, { required: true })}
+              />
+              {errors[`criteria${criteria.id}`] && (
+                <small className='form-text text-danger'>Mohon isi {criteria.name} dengan benar</small>
+              )}
+            </div>
+          </div>
+        ))}
         <div className='d-flex justify-content-end p-3'>
           <button className='btn btn-success' type='submit'>
             {pengajuan ? 'Update' : 'Tambah'}

@@ -4,12 +4,11 @@ import { NextPageWithLayout } from 'pages/_app'
 import { useEffect, useState } from 'react'
 import withDashboardLayout from 'src/components/layout/DashboardLayout'
 import AlternativeDetail from 'src/components/page/alternative/AlternativeDetail'
-import AlternativeForm from 'src/components/page/alternative/AlternativeForm'
+import AlternativeForm, { PengajuanDetail } from 'src/components/page/alternative/AlternativeForm'
 import { API_ENDPOINT } from 'src/const/Global'
 import { useAppDispatch } from 'src/hook/useRedux'
 import useRequest from 'src/hook/useRequest'
 import ReducerActions from 'src/redux/ReducerAction'
-import { Pengajuan } from '.'
 
 interface PageRouter extends NextRouter {
   query: {
@@ -24,7 +23,7 @@ interface Props {
 
 const DetailAlternative: NextPageWithLayout<Props> = ({ id: altId }) => {
   const router = useRouter() as PageRouter
-  const [pengajuanData, setPengajuanData] = useState({} as Pengajuan)
+  const [pengajuanData, setPengajuanData] = useState({} as PengajuanDetail)
   const { edit } = router.query
   const id = router.query.id || altId
   const [mode, setMode] = useState<'view' | 'edit'>(edit ? 'edit' : 'view')
@@ -32,7 +31,7 @@ const DetailAlternative: NextPageWithLayout<Props> = ({ id: altId }) => {
   const { authReq } = useRequest()
   useEffect(() => {
     dispatch(ReducerActions.ui.masterLoader(true))
-    authReq<{ data: Pengajuan }>({
+    authReq<{ data: PengajuanDetail }>({
       url: API_ENDPOINT + `/api/pengajuan/${id}`,
       method: 'GET',
     })
