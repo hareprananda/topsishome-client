@@ -6,13 +6,8 @@ import { API_ENDPOINT } from 'src/const/Global'
 import { useAppDispatch } from 'src/hook/useRedux'
 import useRequest from 'src/hook/useRequest'
 import ReducerActions from 'src/redux/ReducerAction'
-
-interface Criteria {
-  _id: string
-  name: string
-  keterangan: 'cost' | 'benefit'
-  bobot: number
-}
+import { Criteria } from 'src/request/criteria/Criteria.model'
+import CriteriaConfig from 'src/request/criteria/CriteriaConfig'
 
 const Criteria: NextPageWithLayout = () => {
   const [criteriaList, setCriteriaList] = useState<Criteria[]>([])
@@ -28,10 +23,7 @@ const Criteria: NextPageWithLayout = () => {
   }, [])
 
   const fetchCriteria = () => {
-    authReq<{ data: Criteria[] }>({
-      method: 'GET',
-      url: `${API_ENDPOINT}/api/criteria`,
-    }).then(res => {
+    authReq<{ data: Criteria[] }>(CriteriaConfig.get()).then(res => {
       setCriteriaList(res.data.data)
     })
   }

@@ -6,7 +6,11 @@ const TopsisConfig = () => {
     url: `${API_ENDPOINT}/api/result`,
   })
 
-  return { result }
+  const resultDetail = (): AxiosRequestConfig => ({
+    url: `${API_ENDPOINT}/api/result-detail`,
+  })
+
+  return { result, resultDetail }
 }
 
 export default TopsisConfig()
