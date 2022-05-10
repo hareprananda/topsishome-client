@@ -41,7 +41,13 @@ const StatusModal = () => {
         style={{ display: 'none' }}
       />
 
-      <div className='modal fade' id={'status-modal'} tabIndex={-1} role='dialog' aria-hidden='true'>
+      <div
+        className='modal fade'
+        id={'status-modal'}
+        tabIndex={-1}
+        role='dialog'
+        aria-hidden='true'
+        style={{ zIndex: 2000 }}>
         <div className={`modal-dialog modal-md`} role='document'>
           <div className='modal-content'>
             <div className='modal-body'>

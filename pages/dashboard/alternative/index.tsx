@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { NextPageWithLayout } from 'pages/_app'
 import withDashboardLayout from 'src/components/layout/DashboardLayout'
 import { useAppDispatch } from 'src/hook/useRedux'
@@ -8,6 +8,8 @@ import { API_ENDPOINT } from 'src/const/Global'
 import { Pagination } from 'src/types/Global'
 import Link from 'next/link'
 import { Route } from 'src/const/Route'
+import Modal from 'src/components/modal/Modal'
+import { AxiosError } from 'axios'
 
 export interface SinglePengajuanList {
   _id: string
@@ -23,6 +25,9 @@ export interface SinglePengajuanList {
 }
 
 const Alternative: NextPageWithLayout = () => {
+  const formRef = useRef<HTMLFormElement | null>(null)
+  const inputFileRef = useRef<HTMLInputElement | null>(null)
+
   const dispatch = useAppDispatch()
   const { authReq } = useRequest()
   const [alternativeList, setAlternativeList] = useState<SinglePengajuanList[]>([])
@@ -31,6 +36,15 @@ const Alternative: NextPageWithLayout = () => {
     maxPage: 1,
     dataPerPage: 1,
   })
+  const [openUploadModal, setOpenUploadModal] = useState(false)
+  const [uploadedFileName, setUploadedFileName] = useState('')
+
+  useEffect(() => {
+    if (!openUploadModal) {
+      if (inputFileRef.current) inputFileRef.current.value = ''
+      setUploadedFileName('')
+    }
+  }, [openUploadModal])
 
   useEffect(() => {
     dispatch(ReducerActions.ui.setTitle('Alternatif'))
@@ -109,6 +123,50 @@ const Alternative: NextPageWithLayout = () => {
     )
   }
 
+  const submitFile = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    const formData = new FormData()
+    formData.append('alternative', fileRef.current as File)
+    dispatch(ReducerActions.ui.masterLoader(true))
+    authReq({
+      method: 'POST',
+      url: API_ENDPOINT + '/api/upload/users',
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+      data: formData,
+    })
+      .then(() => {
+        dispatch(
+          ReducerActions.ui.setStatusModal({ type: 'success', title: 'Success', message: 'File Successfully uploaded' })
+        )
+        setOpenUploadModal(false)
+      })
+      .catch((err: AxiosError) => {
+        if (inputFileRef.current) inputFileRef.current.value = ''
+        setUploadedFileName('')
+        dispatch(ReducerActions.ui.setStatusModal({ type: 'error', title: 'Oops', message: err.response?.data.data }))
+      })
+      .finally(() => {
+        dispatch(ReducerActions.ui.masterLoader(false))
+      })
+  }
+  const fileRef = useRef<File>()
+
+  const changeInputFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    const split = file.name.split('.')
+    const extension = split[split.length - 1]
+    if (extension !== 'xlsx') {
+      dispatch(ReducerActions.ui.setStatusModal({ message: 'Wrong file extension', title: 'Oops', type: 'error' }))
+      if (inputFileRef.current) inputFileRef.current.value = ''
+      return
+    }
+    fileRef.current = file
+    setUploadedFileName(file.name)
+  }
+
   return (
     <div className='card'>
       <div className='card-header d-flex justify-content-end'>
@@ -118,6 +176,14 @@ const Alternative: NextPageWithLayout = () => {
             <p className='m-0 ml-2'>Tambah Alternatif</p>
           </a>
         </Link>
+
+        <button
+          className='btn btn-primary d-flex ml-1'
+          onClick={() => setOpenUploadModal(true)}
+          style={{ alignItems: 'center' }}>
+          <i className='fas fa-upload' />
+          <p className='m-0 ml-2'>Upload Excel</p>
+        </button>
       </div>
       <div className='card-body'>
         <table className='table'>
@@ -181,6 +247,25 @@ const Alternative: NextPageWithLayout = () => {
           </ul>
         </nav>
       </div>
+      <Modal open={openUploadModal} size='lg' title='Upload Alternatif' setOpen={setOpenUploadModal}>
+        <form ref={formRef} onSubmit={submitFile}>
+          <input ref={inputFileRef} onChange={changeInputFile} type='file' className='d-none' accept='.xlsx' />
+          <div className='d-flex align-items-center flex-column '>
+            <button className='btn btn-warning' type='button' onClick={() => inputFileRef.current?.click()}>
+              <i className='fas fa-upload' /> Pilih File Excel
+            </button>
+
+            {uploadedFileName && (
+              <>
+                <p className='h5 mt-5'>{uploadedFileName}</p>
+                <button className='btn btn-primary mt-2' type='submit'>
+                  <i className='fa fa-paper-plane' /> Submit
+                </button>
+              </>
+            )}
+          </div>
+        </form>
+      </Modal>
     </div>
   )
 }

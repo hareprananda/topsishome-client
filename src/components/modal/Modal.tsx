@@ -30,6 +30,7 @@ const Modal: React.FC<Props> = ({ open, title, children, size, setOpen }) => {
         type='button'
         ref={buttonRef}
         data-toggle='modal'
+        data-backdrop='static'
         data-target={`#${modalId}`}
         style={{ display: 'none' }}
       />
