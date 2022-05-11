@@ -1,6 +1,7 @@
 export interface Result {
   id: string
   nama: string
+  alamat: string
   value: number
 }
 

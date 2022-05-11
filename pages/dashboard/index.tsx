@@ -151,8 +151,9 @@ const Index: NextPageWithLayout = () => {
                       {idx + 1}
                     </h4>
                     <div style={{ marginLeft: '40px' }}>
-                      <h5>{res.nama}</h5>
-                      <p>{res.value.toFixed(4)}</p>
+                      <h5 className='m-0'>{res.nama}</h5>
+                      <p className='m-0'>Alamat: {res.alamat}</p>
+                      <p>Nilai: {res.value.toFixed(4)}</p>
                     </div>
 
                     <i className='fas fa-chevron-right'></i>
