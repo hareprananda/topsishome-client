@@ -38,6 +38,7 @@ const Alternative: NextPageWithLayout = () => {
   })
   const [openUploadModal, setOpenUploadModal] = useState(false)
   const [uploadedFileName, setUploadedFileName] = useState('')
+  const [nameSearch, setNameSearch] = useState('')
 
   useEffect(() => {
     if (!openUploadModal) {
@@ -61,6 +62,7 @@ const Alternative: NextPageWithLayout = () => {
       url: API_ENDPOINT + '/api/pengajuan',
       params: {
         page: metaData.currentPage,
+        name: nameSearch,
       },
     })
       .then(res => {
@@ -169,9 +171,27 @@ const Alternative: NextPageWithLayout = () => {
 
   return (
     <div className='card'>
-      <div className='card-header d-flex justify-content-end'>
+      <div className='card-header d-flex justify-content-end align-items-center'>
+        <form
+          onSubmit={e => {
+            e.preventDefault()
+            fetchAlternative()
+          }}
+          className='d-flex align-items-center'
+          style={{ flex: 'auto' }}>
+          <input
+            onChange={e => setNameSearch(e.target.value)}
+            type='text'
+            className='form-control'
+            placeholder='Nama...'
+            style={{ width: '300px' }}
+          />
+          <button type='submit' className='btn btn-danger ml-2'>
+            <i className='fas fa-search' /> Search
+          </button>
+        </form>
         <Link href={Route.AlternativeAdd}>
-          <a className='btn btn-success d-flex' style={{ alignItems: 'center' }}>
+          <a className='btn btn-success d-flex' style={{ alignItems: 'center', flexShrink: 0 }}>
             <i className='fas fa-plus' />
             <p className='m-0 ml-2'>Tambah Alternatif</p>
           </a>
@@ -180,7 +200,7 @@ const Alternative: NextPageWithLayout = () => {
         <button
           className='btn btn-primary d-flex ml-1'
           onClick={() => setOpenUploadModal(true)}
-          style={{ alignItems: 'center' }}>
+          style={{ alignItems: 'center', flexShrink: 0 }}>
           <i className='fas fa-upload' />
           <p className='m-0 ml-2'>Upload Excel</p>
         </button>
