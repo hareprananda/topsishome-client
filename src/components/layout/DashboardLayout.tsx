@@ -30,7 +30,6 @@ const DashboardLayout: React.FC = ({ children }) => {
   }
 
   useEffect(() => {
-    dispatch(ReducerActions.ui.masterLoader(true))
     authReq<MeResponse>({
       url: `${API_ENDPOINT}/api/me`,
     })
@@ -44,8 +43,7 @@ const DashboardLayout: React.FC = ({ children }) => {
         const homeDashboardRegex = new RegExp(Route.Home + '$', 'g')
         if (homeDashboardRegex.test(router.pathname)) setOpenWelcomeModal(true)
       })
-      .catch(() => null)
-      .finally(() => dispatch(ReducerActions.ui.masterLoader(false)))
+      .catch(() => alert('Oops something gone wrong when fetch me data'))
   }, [])
 
   const onLogout = () => {
@@ -135,6 +133,14 @@ const DashboardLayout: React.FC = ({ children }) => {
                   <a className={`nav-link ${isMenuActive(Route.Criteria)}`}>
                     <i className='nav-icon fas fa-book'></i>
                     <p>Data Kriteria</p>
+                  </a>
+                </Link>
+              </li>
+              <li className='nav-item'>
+                <Link href={Route.Banjar}>
+                  <a className={`nav-link ${isMenuActive(Route.Banjar)}`}>
+                    <i className='nav-icon fas fa-university'></i>
+                    <p>Data Banjar</p>
                   </a>
                 </Link>
               </li>

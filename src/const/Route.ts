@@ -6,6 +6,7 @@ export const Route = {
   AlternativeDetail: (id: string) => `/dashboard/alternative/${id}`,
   AlternativeAdd: '/dashboard/alternative/add',
   Criteria: '/dashboard/criteria',
+  Banjar: '/dashboard/banjar',
   Selection: '/dashboard/selection',
   Result: '/dashboard/result',
   UserAccess: '/dashboard/user',

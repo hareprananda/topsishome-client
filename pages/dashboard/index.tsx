@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { NextPageWithLayout } from 'pages/_app'
 import withDashboardLayout from 'src/components/layout/DashboardLayout'
 import { useAppDispatch } from 'src/hook/useRedux'
@@ -9,62 +9,24 @@ import { Result } from 'src/request/topsis/Topsis.model'
 import Link from 'next/link'
 import { Route } from 'src/const/Route'
 import useChart from 'src/hook/useChart'
-import { PengajuanChart } from 'src/request/pengajuan/Pengajuan.model'
-import PengajuanConfig from 'src/request/pengajuan/PengajuanConfig'
 import { Banjar } from 'src/request/banjar/Banjar.model'
 import BanjarConfig from 'src/request/banjar/BanjarConfig'
 
 const Index: NextPageWithLayout = () => {
   const [result, setResult] = useState<Result[]>([])
+  const [bigTen, setBigTen] = useState<Result[]>([])
   const [allBanjar, setAllBanjar] = useState<Banjar[]>([])
-  const [chartData, setChartData] = useState<PengajuanChart>({
-    gender: [],
-    status: [],
-    umur: [],
-  })
   const dispatch = useAppDispatch()
   const { authReq } = useRequest()
-  const statusChart = useChart('statusChart', {
+  const [chartType, setChartType] = useState<'pie' | 'bar'>('pie')
+
+  const { chart: bigTenChart, updateChart } = useChart('bigTenChart', {
     type: 'pie',
     data: {
       labels: [],
       datasets: [
         {
-          data: [],
-          backgroundColor: ['#dc3545', '#007bff'],
-        },
-      ],
-    },
-    options: {
-      maintainAspectRatio: false,
-      responsive: true,
-    },
-  })
-
-  const genderChart = useChart('genderChart', {
-    type: 'pie',
-    data: {
-      labels: [],
-      datasets: [
-        {
-          data: [],
-          backgroundColor: ['#dc3545', '#007bff'],
-        },
-      ],
-    },
-    options: {
-      maintainAspectRatio: false,
-      responsive: true,
-    },
-  })
-
-  const umurChart = useChart('umurChart', {
-    type: 'bar',
-    data: {
-      labels: [],
-      datasets: [
-        {
-          label: 'Usia',
+          label: 'Jumlah KK',
           data: [],
           backgroundColor: '#007bff',
         },
@@ -76,25 +38,55 @@ const Index: NextPageWithLayout = () => {
     },
   })
 
+  const requestTimes = useRef(1)
+
   const requestResult = (data?: { banjar: string }) => {
     dispatch(ReducerActions.ui.masterLoader(true))
     authReq<{ data: Result[] }>(TopsisConfig.result(data || {}))
       .then(res => {
+        if (requestTimes.current === 1) setBigTen(res.data.data.slice(0, 10))
         setResult(res.data.data)
+        requestTimes.current += 1
       })
       .finally(() => dispatch(ReducerActions.ui.masterLoader(false)))
   }
 
   useEffect(() => {
+    if (!bigTenChart) return
+    const scales =
+      chartType === 'bar'
+        ? {
+            y: {
+              beginAtZero: true,
+              ticks: {
+                callback: (tickVal: string | number) => Math.floor(tickVal as number),
+              },
+            },
+          }
+        : {}
+    const colorArray = ['#007bff', '#6c757d', '#28a745', '#dc3545', '#ffc107', '#17a2b8', '#343a40']
+    const backgroundColor: typeof bigTenChart['data']['datasets'][number]['backgroundColor'] =
+      chartType === 'pie'
+        ? Object.keys(bigTenChart.data.datasets[0].data).map(
+            () => colorArray[Math.floor(Math.random() * colorArray.length)]
+          )
+        : colorArray[0]
+    updateChart({
+      type: chartType,
+      //@ts-ignore
+      data: { ...bigTenChart.data, datasets: [{ ...bigTenChart.data.datasets[0], backgroundColor }] },
+      options: {
+        maintainAspectRatio: false,
+        responsive: true,
+        scales: scales,
+      },
+    })
+  }, [chartType])
+
+  useEffect(() => {
     dispatch(ReducerActions.ui.setTitle('Home'))
 
     requestResult()
-
-    authReq<{ data: PengajuanChart }>(PengajuanConfig.pengajuanChart())
-      .then(res => {
-        setChartData(res.data.data)
-      })
-      .catch(() => null)
 
     authReq<{ data: Banjar[] }>(BanjarConfig.get())
       .then(res => {
@@ -104,19 +96,25 @@ const Index: NextPageWithLayout = () => {
   }, [])
 
   useEffect(() => {
-    if (chartData.gender.length === 0 || !statusChart || !genderChart || !umurChart) return
-    statusChart.data.labels = chartData.status.map(v => v._id)
-    statusChart.data.datasets[0].data = chartData.status.map(v => v.count)
-    statusChart?.update()
+    if (bigTen.length === 0) return
+    const bigTenChartData = bigTen.reduce((acc, v) => {
+      if (acc[v.banjar] === undefined) {
+        acc[v.banjar] = 1
+        return acc
+      }
+      acc[v.banjar] += 1
+      return acc
+    }, {} as Record<string, number>)
 
-    genderChart.data.labels = chartData.gender.map(v => v._id)
-    genderChart.data.datasets[0].data = chartData.gender.map(v => v.count)
-    genderChart?.update()
-
-    umurChart.data.labels = chartData.umur.map(v => v._id)
-    umurChart.data.datasets[0].data = chartData.umur.map(v => v.count)
-    umurChart?.update()
-  }, [chartData])
+    if (!bigTenChart) return
+    const colorArray = ['#007bff', '#6c757d', '#28a745', '#dc3545', '#ffc107', '#17a2b8', '#343a40']
+    bigTenChart.data.datasets[0].backgroundColor = Object.keys(bigTenChartData).map(
+      () => colorArray[Math.floor(Math.random() * colorArray.length)]
+    )
+    bigTenChart.data.labels = Object.keys(bigTenChartData)
+    bigTenChart.data.datasets[0].data = Object.values(bigTenChartData)
+    bigTenChart?.update()
+  }, [bigTen])
 
   const changeBanjar = (e: React.ChangeEvent<HTMLSelectElement>) => {
     requestResult({ banjar: e.target.value })
@@ -128,39 +126,22 @@ const Index: NextPageWithLayout = () => {
         <div className='col-12'>
           <div className='card card-default'>
             <div className='card-header'>
-              <h4>Umur</h4>
+              <h4 className='card-title font-weight-bold'>Penerima per banjar</h4>
+              <div className='card-tools'>
+                <button className='btn btn-primary' onClick={() => setChartType(chartType === 'bar' ? 'pie' : 'bar')}>
+                  {chartType === 'bar' ? 'Pie' : 'Bar'} Chart
+                </button>
+              </div>
             </div>
             <div className='card-body'>
-              <canvas id='umurChart' style={{ height: '400px' }} />
-            </div>
-          </div>
-        </div>
-        <div className='col-6'>
-          <div className='card card-default'>
-            <div className='card-header'>
-              <h4>Status</h4>
-            </div>
-            <div className='card-body'>
-              <canvas id='statusChart' />
-            </div>
-          </div>
-        </div>
-        <div className='col-6'>
-          <div className='card card-default'>
-            <div className='card-header'>
-              <h4>Jenis Kelamin</h4>
-            </div>
-            <div className='card-body'>
-              <canvas id='genderChart' />
+              <canvas id='bigTenChart' style={{ height: '400px' }} />
             </div>
           </div>
         </div>
       </div>
       <div className='card card-default'>
         <div className='card-header'>
-          <h4 className='card-title font-weight-bold' style={{ fontSize: '24px!important' }}>
-            Final Rankings
-          </h4>
+          <h4 className='card-title font-weight-bold'>Final Rankings</h4>
           <div className='card-tools'>
             <select onChange={changeBanjar} className='custom-select' style={{ minWidth: '200px' }}>
               <option selected value=''>

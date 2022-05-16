@@ -6,7 +6,24 @@ const BanjarConfig = () => {
     url: `${API_ENDPOINT}/api/banjar`,
   })
 
-  return { get }
+  const update = (payload: { nama: string }, id: string): AxiosRequestConfig => ({
+    url: `${API_ENDPOINT}/api/banjar/${id}`,
+    method: 'PUT',
+    data: payload,
+  })
+
+  const remove = (params: { id: string }): AxiosRequestConfig => ({
+    url: `${API_ENDPOINT}/api/banjar/${params.id}`,
+    method: 'DELETE',
+  })
+
+  const store = (payload: { nama: string }): AxiosRequestConfig => ({
+    url: `${API_ENDPOINT}/api/banjar`,
+    method: 'POST',
+    data: payload,
+  })
+
+  return { get, update, remove, store }
 }
 
 export default BanjarConfig()

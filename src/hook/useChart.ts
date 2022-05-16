@@ -26,7 +26,17 @@ const useChart = (
     return () => currentChart.current?.destroy()
   }, [])
 
-  return currentChart.current
+  const updateChart = (
+    config: ChartConfiguration<keyof ChartTypeRegistry, (number | ScatterDataPoint | BubbleDataPoint)[], unknown>
+  ) => {
+    currentChart.current?.destroy()
+    Chart.register(...registerables)
+    const el = document.getElementById(canvasId) as ChartItem
+    currentChart.current = undefined
+    currentChart.current = new Chart(el, config)
+  }
+
+  return { chart: currentChart.current, updateChart }
 }
 
 export default useChart
