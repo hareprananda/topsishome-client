@@ -102,23 +102,6 @@ const Alternative: NextPageWithLayout = () => {
     })
   }
 
-  const paginationButton = () => {
-    const paginationButtons: JSX.Element[] = []
-    for (let i = 0; i < metaData.maxPage; i++) {
-      paginationButtons.push(
-        <li
-          className={`page-item ${metaData.currentPage === i + 1 ? 'disabled' : ''}`}
-          key={i}
-          style={{ cursor: 'pointer' }}>
-          <div className='page-link' onClick={() => setMetaData(current => ({ ...current, currentPage: i + 1 }))}>
-            {i + 1}
-          </div>
-        </li>
-      )
-    }
-    return paginationButtons
-  }
-
   const onDelete = (id: string) => {
     dispatch(ReducerActions.ui.masterLoader(true))
     authReq({
@@ -190,7 +173,8 @@ const Alternative: NextPageWithLayout = () => {
         <form
           onSubmit={e => {
             e.preventDefault()
-            fetchAlternative()
+            if (metaData.currentPage !== 1) setMetaData(c => ({ ...c, currentPage: 1 }))
+            else fetchAlternative()
           }}
           onChange={changeFilter}
           className='d-flex align-items-center'
@@ -274,15 +258,21 @@ const Alternative: NextPageWithLayout = () => {
         <nav aria-label='Page navigation example'>
           <ul className='pagination justify-content-center'>
             <li className={`page-item ${metaData.currentPage === 1 ? 'disabled' : ''}`}>
-              <a className='page-link' href='#'>
+              <button
+                className='page-link'
+                onClick={() => setMetaData(c => ({ ...c, currentPage: c.currentPage - 1 }))}>
                 <i className='fas fa-chevron-left'></i>
-              </a>
+              </button>
             </li>
-            {paginationButton()}
+            <li className={`page-item`}>
+              <div className='page-link'>{`Page ${metaData.currentPage} of ${metaData.maxPage}`}</div>
+            </li>
             <li className={`page-item ${metaData.currentPage === metaData.maxPage ? 'disabled' : ''}`}>
-              <a className='page-link' href='#'>
+              <button
+                onClick={() => setMetaData(c => ({ ...c, currentPage: c.currentPage + 1 }))}
+                className='page-link'>
                 <i className='fas fa-chevron-right'></i>
-              </a>
+              </button>
             </li>
           </ul>
         </nav>
