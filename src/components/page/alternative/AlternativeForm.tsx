@@ -7,12 +7,16 @@ import useRequest from 'src/hook/useRequest'
 import ReducerActions from 'src/redux/ReducerAction'
 import { Criteria } from 'request/criteria/Criteria.model'
 import CriteriaConfig from 'src/request/criteria/CriteriaConfig'
+import BanjarConfig from 'src/request/banjar/BanjarConfig'
+import { Banjar } from 'src/request/banjar/Banjar.model'
 
 export interface PengajuanDetail {
   _id: string
   alamat: string
   status: string
   jenisKelamin: string
+  idBanjar: string
+  namaBanjar: string
   umur: number
   pekerjaan: string
   nama: string
@@ -33,12 +37,13 @@ const AlternativeForm: React.FC<Props> = ({ pengajuan, setPengajuan }) => {
   const { authReq } = useRequest()
   const dispatch = useAppDispatch()
   const [allCriteria, setAllCriteria] = useState<(Omit<Criteria, '_id'> & { id: string })[]>([])
+  const [banjarList, setBanjarList] = useState<Banjar[]>([])
 
   const onSubmit = handleSubmit(data => {
     const mode = pengajuan ? 'update' : 'add'
     const method = mode == 'add' ? 'POST' : 'PUT'
     const url = `${API_ENDPOINT}/api/pengajuan` + (mode == 'add' ? '' : '/' + pengajuan?._id)
-    const { nama, alamat, jenisKelamin, pekerjaan, status, umur, ...criteria } = data
+    const { nama, alamat, jenisKelamin, pekerjaan, status, umur, idBanjar, ...criteria } = data
     const criteriaPayload = Object.keys(criteria).map(key => ({
       id: key.replace(/^criteria/g, ''),
       value: data[key],
@@ -50,6 +55,7 @@ const AlternativeForm: React.FC<Props> = ({ pengajuan, setPengajuan }) => {
       pekerjaan,
       status,
       umur,
+      idBanjar,
       criteria: criteriaPayload,
     }
 
@@ -85,21 +91,32 @@ const AlternativeForm: React.FC<Props> = ({ pengajuan, setPengajuan }) => {
       })
     }
     if (!pengajuan || Object.keys(pengajuan).length === 0) return
-    const { nama, alamat, jenisKelamin, pekerjaan, status, umur, criteria } = pengajuan
+    const { nama, alamat, jenisKelamin, pekerjaan, status, umur, criteria, idBanjar } = pengajuan
     const criteriaForm = criteria.reduce((acc, cr) => {
       acc[`criteria${cr.id}`] = cr.value
       return acc
     }, {} as Record<string, number>)
-    resetForm({
-      nama,
-      alamat,
-      jenisKelamin,
-      pekerjaan,
-      status,
-      umur,
-      ...criteriaForm,
-    })
+    setTimeout(() => {
+      resetForm({
+        nama,
+        idBanjar,
+        alamat,
+        jenisKelamin,
+        pekerjaan,
+        status,
+        umur,
+        ...criteriaForm,
+      })
+    }, 100)
   }, [pengajuan])
+
+  useEffect(() => {
+    authReq<{ data: Banjar[] }>(BanjarConfig.get())
+      .then(res => {
+        setBanjarList(res.data.data)
+      })
+      .catch(() => null)
+  }, [])
   return (
     <div>
       <form onSubmit={onSubmit}>
@@ -126,6 +143,20 @@ const AlternativeForm: React.FC<Props> = ({ pengajuan, setPengajuan }) => {
               {...register('alamat', { required: true })}
             />
             {errors.alamat && <small className='form-text text-danger'>Mohon isi alamat dengan benar</small>}
+          </div>
+        </div>
+        <div className='row align-middle' style={{ alignItems: 'center' }}>
+          <div className='col-4 text-left p-3 font-weight-bold'>Banjar :</div>
+          <div className='col-8 text-left p-3'>
+            <select className='custom-select' {...register('idBanjar', { required: true, validate: value => !!value })}>
+              <option value=''>Banjar...</option>
+              {banjarList.map((v, k) => (
+                <option key={k} value={v._id}>
+                  {v.nama}
+                </option>
+              ))}
+            </select>
+            {errors.status && <small className='form-text text-danger'>Mohon isi status dengan benar</small>}
           </div>
         </div>
         <div className='row border-bottom align-middle' style={{ alignItems: 'center' }}>

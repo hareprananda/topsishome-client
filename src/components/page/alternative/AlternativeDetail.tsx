@@ -18,6 +18,10 @@ const AlternativeDetail: React.FC<Props> = ({ pengajuan }) => {
         <div className='col-8 text-left p-3'>{pengajuan.alamat}</div>
       </div>
       <div className='row border-bottom'>
+        <div className='col-4 text-left p-3 font-weight-bold'>Banjar :</div>
+        <div className='col-8 text-left p-3'>{pengajuan.namaBanjar}</div>
+      </div>
+      <div className='row border-bottom'>
         <div className='col-4 text-left p-3 font-weight-bold'>Jenis Kelamin :</div>
         <div className='col-8 text-left p-3'>{pengajuan.jenisKelamin}</div>
       </div>
