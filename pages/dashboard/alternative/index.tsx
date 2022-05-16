@@ -10,6 +10,8 @@ import Link from 'next/link'
 import { Route } from 'src/const/Route'
 import Modal from 'src/components/modal/Modal'
 import { AxiosError } from 'axios'
+import { Banjar } from 'src/request/banjar/Banjar.model'
+import BanjarConfig from 'src/request/banjar/BanjarConfig'
 
 export interface SinglePengajuanList {
   _id: string
@@ -27,7 +29,7 @@ export interface SinglePengajuanList {
 const Alternative: NextPageWithLayout = () => {
   const formRef = useRef<HTMLFormElement | null>(null)
   const inputFileRef = useRef<HTMLInputElement | null>(null)
-
+  const [allBanjar, setAllBanjar] = useState<Banjar[]>([])
   const dispatch = useAppDispatch()
   const { authReq } = useRequest()
   const [alternativeList, setAlternativeList] = useState<SinglePengajuanList[]>([])
@@ -38,7 +40,7 @@ const Alternative: NextPageWithLayout = () => {
   })
   const [openUploadModal, setOpenUploadModal] = useState(false)
   const [uploadedFileName, setUploadedFileName] = useState('')
-  const [nameSearch, setNameSearch] = useState('')
+  const [searchFilter, setSearchFilter] = useState<Record<string, string>>({})
 
   useEffect(() => {
     if (!openUploadModal) {
@@ -49,6 +51,11 @@ const Alternative: NextPageWithLayout = () => {
 
   useEffect(() => {
     dispatch(ReducerActions.ui.setTitle('Alternatif'))
+    authReq<{ data: Banjar[] }>(BanjarConfig.get())
+      .then(res => {
+        setAllBanjar(res.data.data)
+      })
+      .catch(() => null)
   }, [])
 
   useEffect(() => {
@@ -62,7 +69,7 @@ const Alternative: NextPageWithLayout = () => {
       url: API_ENDPOINT + '/api/pengajuan',
       params: {
         page: metaData.currentPage,
-        name: nameSearch,
+        ...searchFilter,
       },
     })
       .then(res => {
@@ -85,6 +92,14 @@ const Alternative: NextPageWithLayout = () => {
       .finally(() => {
         dispatch(ReducerActions.ui.masterLoader(false))
       })
+  }
+
+  const changeFilter = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    setSearchFilter({
+      banjar: e.currentTarget.banjar.value,
+      name: (e.currentTarget['name'] as any).value,
+    })
   }
 
   const paginationButton = () => {
@@ -177,15 +192,20 @@ const Alternative: NextPageWithLayout = () => {
             e.preventDefault()
             fetchAlternative()
           }}
+          onChange={changeFilter}
           className='d-flex align-items-center'
           style={{ flex: 'auto' }}>
-          <input
-            onChange={e => setNameSearch(e.target.value)}
-            type='text'
-            className='form-control'
-            placeholder='Nama...'
-            style={{ width: '300px' }}
-          />
+          <input type='text' name='name' className='form-control' placeholder='Nama...' style={{ width: '200px' }} />
+          <select name='banjar' className='custom-select ml-2' style={{ width: '200px' }}>
+            <option selected value=''>
+              Semua Banjar
+            </option>
+            {allBanjar.map((v, k) => (
+              <option key={k} value={v._id}>
+                {v.nama}
+              </option>
+            ))}
+          </select>
           <button type='submit' className='btn btn-danger ml-2'>
             <i className='fas fa-search' /> Search
           </button>

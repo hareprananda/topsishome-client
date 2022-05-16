@@ -11,9 +11,12 @@ import { Route } from 'src/const/Route'
 import useChart from 'src/hook/useChart'
 import { PengajuanChart } from 'src/request/pengajuan/Pengajuan.model'
 import PengajuanConfig from 'src/request/pengajuan/PengajuanConfig'
+import { Banjar } from 'src/request/banjar/Banjar.model'
+import BanjarConfig from 'src/request/banjar/BanjarConfig'
 
 const Index: NextPageWithLayout = () => {
   const [result, setResult] = useState<Result[]>([])
+  const [allBanjar, setAllBanjar] = useState<Banjar[]>([])
   const [chartData, setChartData] = useState<PengajuanChart>({
     gender: [],
     status: [],
@@ -72,18 +75,30 @@ const Index: NextPageWithLayout = () => {
       responsive: true,
     },
   })
-  useEffect(() => {
-    dispatch(ReducerActions.ui.setTitle('Home'))
+
+  const requestResult = (data?: { banjar: string }) => {
     dispatch(ReducerActions.ui.masterLoader(true))
-    authReq<{ data: Result[] }>(TopsisConfig.result())
+    authReq<{ data: Result[] }>(TopsisConfig.result(data || {}))
       .then(res => {
         setResult(res.data.data)
       })
       .finally(() => dispatch(ReducerActions.ui.masterLoader(false)))
+  }
+
+  useEffect(() => {
+    dispatch(ReducerActions.ui.setTitle('Home'))
+
+    requestResult()
 
     authReq<{ data: PengajuanChart }>(PengajuanConfig.pengajuanChart())
       .then(res => {
         setChartData(res.data.data)
+      })
+      .catch(() => null)
+
+    authReq<{ data: Banjar[] }>(BanjarConfig.get())
+      .then(res => {
+        setAllBanjar(res.data.data)
       })
       .catch(() => null)
   }, [])
@@ -102,6 +117,10 @@ const Index: NextPageWithLayout = () => {
     umurChart.data.datasets[0].data = chartData.umur.map(v => v.count)
     umurChart?.update()
   }, [chartData])
+
+  const changeBanjar = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    requestResult({ banjar: e.target.value })
+  }
 
   return (
     <div>
@@ -139,13 +158,27 @@ const Index: NextPageWithLayout = () => {
       </div>
       <div className='card card-default'>
         <div className='card-header'>
-          <h4>Final Ranking</h4>
+          <h4 className='card-title font-weight-bold' style={{ fontSize: '24px!important' }}>
+            Final Rankings
+          </h4>
+          <div className='card-tools'>
+            <select onChange={changeBanjar} className='custom-select' style={{ minWidth: '200px' }}>
+              <option selected value=''>
+                Semua Banjar
+              </option>
+              {allBanjar.map((v, k) => (
+                <option key={k} value={v._id}>
+                  {v.nama}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
         <div className='card-body'>
           {result.map((res, idx) => (
             <Link key={res.id} href={Route.AlternativeDetail(res.id)}>
               <a>
-                <div className={`callout callout-${idx < 3 ? 'success' : 'danger'} position-relative`}>
+                <div className={`callout callout-${idx < 10 ? 'success' : 'danger'} position-relative`}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <h4 style={{ position: 'absolute', top: '50%', transform: 'translate(0, -50%)', left: '15px' }}>
                       {idx + 1}
