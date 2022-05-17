@@ -30,6 +30,10 @@ const DashboardLayout: React.FC = ({ children }) => {
   }
 
   useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const token = LocalStorage.get('user')?.access_token
+      if (!token) return
+    }
     authReq<MeResponse>({
       url: `${API_ENDPOINT}/api/me`,
     })

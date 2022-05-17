@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { NextPageWithLayout } from 'pages/_app'
 import withDashboardLayout from 'src/components/layout/DashboardLayout'
 import { useAppDispatch } from 'src/hook/useRedux'
@@ -13,12 +13,14 @@ import { Banjar } from 'src/request/banjar/Banjar.model'
 import BanjarConfig from 'src/request/banjar/BanjarConfig'
 
 const Index: NextPageWithLayout = () => {
+  const maxPerPage = useMemo(() => 20, [])
   const [result, setResult] = useState<Result[]>([])
   const [bigTen, setBigTen] = useState<Result[]>([])
   const [allBanjar, setAllBanjar] = useState<Banjar[]>([])
   const dispatch = useAppDispatch()
   const { authReq } = useRequest()
   const [chartType, setChartType] = useState<'pie' | 'bar'>('pie')
+  const [metadata, setMetadata] = useState({ currentPage: 1, maxPage: 1 })
 
   const { chart: bigTenChart, updateChart } = useChart('bigTenChart', {
     type: 'pie',
@@ -47,6 +49,10 @@ const Index: NextPageWithLayout = () => {
         if (requestTimes.current === 1) setBigTen(res.data.data.slice(0, 10))
         setResult(res.data.data)
         requestTimes.current += 1
+        setMetadata({
+          currentPage: 1,
+          maxPage: Math.ceil(res.data.data.length / maxPerPage),
+        })
       })
       .finally(() => dispatch(ReducerActions.ui.masterLoader(false)))
   }
@@ -143,10 +149,8 @@ const Index: NextPageWithLayout = () => {
         <div className='card-header'>
           <h4 className='card-title font-weight-bold'>Final Rankings</h4>
           <div className='card-tools'>
-            <select onChange={changeBanjar} className='custom-select' style={{ minWidth: '200px' }}>
-              <option selected value=''>
-                Semua Banjar
-              </option>
+            <select defaultValue={''} onChange={changeBanjar} className='custom-select' style={{ minWidth: '200px' }}>
+              <option value=''>Semua Banjar</option>
               {allBanjar.map((v, k) => (
                 <option key={k} value={v._id}>
                   {v.nama}
@@ -156,13 +160,13 @@ const Index: NextPageWithLayout = () => {
           </div>
         </div>
         <div className='card-body'>
-          {result.map((res, idx) => (
+          {result.slice((metadata.currentPage - 1) * maxPerPage, metadata.currentPage * maxPerPage).map((res, idx) => (
             <Link key={res.id} href={Route.AlternativeDetail(res.id)}>
               <a>
                 <div className={`callout callout-${idx < 10 ? 'success' : 'danger'} position-relative`}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <h4 style={{ position: 'absolute', top: '50%', transform: 'translate(0, -50%)', left: '15px' }}>
-                      {idx + 1}
+                      {(metadata.currentPage - 1) * maxPerPage + idx + 1}
                     </h4>
                     <div style={{ marginLeft: '40px' }}>
                       <h5 className='m-0'>{res.nama}</h5>
@@ -176,6 +180,29 @@ const Index: NextPageWithLayout = () => {
               </a>
             </Link>
           ))}
+        </div>
+        <div className='card-footer'>
+          <nav aria-label='Page navigation example'>
+            <ul className='pagination justify-content-center'>
+              <li className={`page-item ${metadata.currentPage === 1 ? 'disabled' : ''}`}>
+                <button
+                  className='page-link'
+                  onClick={() => setMetadata(c => ({ ...c, currentPage: c.currentPage - 1 }))}>
+                  <i className='fas fa-chevron-left'></i>
+                </button>
+              </li>
+              <li className={`page-item`}>
+                <div className='page-link'>{`Page ${metadata.currentPage} of ${metadata.maxPage}`}</div>
+              </li>
+              <li className={`page-item ${metadata.currentPage === metadata.maxPage ? 'disabled' : ''}`}>
+                <button
+                  onClick={() => setMetadata(c => ({ ...c, currentPage: c.currentPage + 1 }))}
+                  className='page-link'>
+                  <i className='fas fa-chevron-right'></i>
+                </button>
+              </li>
+            </ul>
+          </nav>
         </div>
       </div>
     </div>
