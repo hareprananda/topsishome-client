@@ -3,6 +3,7 @@ export interface Result {
   nama: string
   alamat: string
   banjar: string
+  year: number
   value: number
 }
 

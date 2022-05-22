@@ -47,7 +47,7 @@ const DashboardLayout: React.FC = ({ children }) => {
         const homeDashboardRegex = new RegExp(Route.Home + '$', 'g')
         if (homeDashboardRegex.test(router.pathname)) setOpenWelcomeModal(true)
       })
-      .catch(() => alert('Oops something gone wrong when fetch me data'))
+      .catch(() => null)
   }, [])
 
   const onLogout = () => {
@@ -160,7 +160,7 @@ const DashboardLayout: React.FC = ({ children }) => {
                 <Link href={Route.Result}>
                   <a className={`nav-link ${isMenuActive(Route.Result)}`}>
                     <i className='nav-icon fas fa-table'></i>
-                    <p>Hasil Seleksi</p>
+                    <p>Seleksi</p>
                   </a>
                 </Link>
               </li>

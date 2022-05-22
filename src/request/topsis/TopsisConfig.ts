@@ -7,11 +7,22 @@ const TopsisConfig = () => {
     params: data,
   })
 
-  const resultDetail = (): AxiosRequestConfig => ({
+  const resultDetail = (params?: { banjar?: string; year?: string }): AxiosRequestConfig => ({
     url: `${API_ENDPOINT}/api/result-detail`,
+    params,
   })
 
-  return { result, resultDetail }
+  const topsisReport = (params?: { banjar?: string; year?: string }): AxiosRequestConfig => ({
+    url: `${API_ENDPOINT}/api/result-report`,
+    responseType: 'arraybuffer',
+    headers: {
+      'Content-disposition': 'attachment; filename=tutorials.xlsx',
+      'Content-Type': 'blob',
+    },
+    params,
+  })
+
+  return { result, resultDetail, topsisReport }
 }
 
 export default TopsisConfig()
