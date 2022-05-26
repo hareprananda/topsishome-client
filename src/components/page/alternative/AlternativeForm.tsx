@@ -269,12 +269,24 @@ const AlternativeForm: React.FC<Props> = ({ pengajuan, setPengajuan }) => {
                   <div className='row border-bottom align-middle' style={{ alignItems: 'center' }} key={criteria.id}>
                     <div className='col-4 text-left p-3 font-weight-bold'>{criteria.name} :</div>
                     <div className='col-8 text-left p-3'>
-                      <input
-                        type='number'
-                        className='form-control'
-                        placeholder={criteria.name + '...'}
-                        {...register(`criteria${criteria.id}-${cr.year}`, { required: true })}
-                      />
+                      {criteria.name.toLowerCase() === 'kondisi rumah' ? (
+                        <select
+                          className='custom-select'
+                          {...register(`criteria${criteria.id}-${cr.year}`, { required: true })}>
+                          <option value='1'>Sangat Buruk</option>
+                          <option value='2'>Buruk</option>
+                          <option value='3'>Cukup</option>
+                          <option value='4'>Baik</option>
+                          <option value='5'>Sangat Baik</option>
+                        </select>
+                      ) : (
+                        <input
+                          type='number'
+                          className='form-control'
+                          placeholder={criteria.name + '...'}
+                          {...register(`criteria${criteria.id}-${cr.year}`, { required: true })}
+                        />
+                      )}
                       {errors[`criteria${criteria.id}`] && (
                         <small className='form-text text-danger'>Mohon isi {criteria.name} dengan benar</small>
                       )}
@@ -317,12 +329,22 @@ const AlternativeForm: React.FC<Props> = ({ pengajuan, setPengajuan }) => {
                 <div className='row border-bottom' key={criteria.id}>
                   <div className='col-4 text-left p-3 font-weight-bold'>{criteria.name} :</div>
                   <div className='col-8 text-left p-3'>
-                    <input
-                      type='number'
-                      className='form-control'
-                      placeholder={criteria.name + '...'}
-                      {...register(`new-criteria${criteria.id}`, { required: true })}
-                    />
+                    {criteria.name.toLowerCase() === 'kondisi rumah' ? (
+                      <select className='custom-select' {...register(`new-criteria${criteria.id}`, { required: true })}>
+                        <option value='1'>Sangat Buruk</option>
+                        <option value='2'>Buruk</option>
+                        <option value='3'>Cukup</option>
+                        <option value='4'>Baik</option>
+                        <option value='5'>Sangat Baik</option>
+                      </select>
+                    ) : (
+                      <input
+                        type='number'
+                        className='form-control'
+                        placeholder={criteria.name + '...'}
+                        {...register(`new-criteria${criteria.id}`, { required: true })}
+                      />
+                    )}
                     {errors[`new-criteria${criteria.id}`] && (
                       <small className='form-text text-danger'>Mohon isi {criteria.name} dengan benar</small>
                     )}
