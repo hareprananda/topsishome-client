@@ -16,6 +16,7 @@ const Index: NextPageWithLayout = () => {
   const maxPerPage = useMemo(() => 20, [])
   const [result, setResult] = useState<Result[]>([])
   const [bigTen, setBigTen] = useState<Result[]>([])
+  const [filter, setFilter] = useState({ banjar: '', year: '' })
   const [allBanjar, setAllBanjar] = useState<Banjar[]>([])
   const dispatch = useAppDispatch()
   const { authReq } = useRequest()
@@ -42,9 +43,9 @@ const Index: NextPageWithLayout = () => {
 
   const requestTimes = useRef(1)
 
-  const requestResult = (data?: { banjar: string }) => {
+  const requestResult = () => {
     dispatch(ReducerActions.ui.masterLoader(true))
-    authReq<{ data: Result[] }>(TopsisConfig.result(data || {}))
+    authReq<{ data: Result[] }>(TopsisConfig.result(filter))
       .then(res => {
         if (requestTimes.current === 1) setBigTen(res.data.data.slice(0, 10))
         setResult(res.data.data)
@@ -92,14 +93,16 @@ const Index: NextPageWithLayout = () => {
   useEffect(() => {
     dispatch(ReducerActions.ui.setTitle('Home'))
 
-    requestResult()
-
     authReq<{ data: Banjar[] }>(BanjarConfig.get())
       .then(res => {
         setAllBanjar(res.data.data)
       })
       .catch(() => null)
   }, [])
+
+  useEffect(() => {
+    requestResult()
+  }, [filter])
 
   useEffect(() => {
     if (bigTen.length === 0) return
@@ -122,8 +125,11 @@ const Index: NextPageWithLayout = () => {
     bigTenChart?.update()
   }, [bigTen])
 
-  const changeBanjar = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    requestResult({ banjar: e.target.value })
+  const changeFilter = (value: string, filterKey: 'banjar' | 'year') => {
+    setFilter({
+      ...filter,
+      [filterKey]: value,
+    })
   }
 
   return (
@@ -148,14 +154,36 @@ const Index: NextPageWithLayout = () => {
       <div className='card card-default'>
         <div className='card-header'>
           <h4 className='card-title font-weight-bold'>Final Rankings</h4>
-          <div className='card-tools'>
-            <select defaultValue={''} onChange={changeBanjar} className='custom-select' style={{ minWidth: '200px' }}>
+          <div className='card-tools d-flex'>
+            <select
+              defaultValue={''}
+              onChange={e => changeFilter(e.target.value, 'banjar')}
+              className='custom-select'
+              style={{ minWidth: '200px' }}>
               <option value=''>Semua Banjar</option>
               {allBanjar.map((v, k) => (
                 <option key={k} value={v._id}>
                   {v.nama}
                 </option>
               ))}
+            </select>
+            <select
+              defaultValue={''}
+              onChange={e => changeFilter(e.target.value, 'year')}
+              className='custom-select'
+              style={{ minWidth: '200px', marginLeft: '10px' }}>
+              <option value=''>Data Terbaru</option>
+              {(() => {
+                const currentDate = new Date().getFullYear()
+                const optionEl: JSX.Element[] = []
+                for (let i = currentDate; i >= currentDate - 4; i--)
+                  optionEl.push(
+                    <option key={i} value={i}>
+                      {i}
+                    </option>
+                  )
+                return optionEl
+              })()}
             </select>
           </div>
         </div>

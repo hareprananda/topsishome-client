@@ -140,7 +140,7 @@ const Result = () => {
             <div className='form-group'>
               <label htmlFor='banjarInput'>Banjar</label>
               <select name='banjar' defaultValue={''} className='custom-select' id='banjarInput'>
-                <option value=''>Choose...</option>
+                <option value=''>Semua banjar</option>
                 {allBanjar.map((v, k) => (
                   <option key={k} value={v._id}>
                     {v.nama}
@@ -158,17 +158,9 @@ const Result = () => {
         <div className='card'>
           <div className='card-header d-flex p-0'>
             <h3 className='card-title p-3'>
-              Seleksi {savedFilter.banjar ? `Banjar ${finalRanking[0].banjar}` : 'Desa'}{' '}
-              {`Tahun ${finalRanking[0].year}`}
+              Seleksi {savedFilter.banjar ? `Banjar ${finalRanking?.[0]?.banjar}` : 'Desa'}{' '}
+              {`Tahun ${finalRanking?.[0]?.year}`}
             </h3>
-            <div style={{ flex: 'auto', display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
-              <button
-                disabled={!resultDetail.finalRanking?.length}
-                className='btn btn-success'
-                onClick={downloadReport}>
-                <i className='fas fa-download' /> Download Laporan
-              </button>
-            </div>
             <ul className='nav nav-pills ml-auto p-2'>
               <li className='nav-item'>
                 <a className='nav-link active' href='#tab_1' data-toggle='tab'>
@@ -244,7 +236,16 @@ const Result = () => {
               <div className='tab-pane' id='tab_2'>
                 <div className='card card-default'>
                   <div className='card-header'>
-                    <h4>Final Ranking</h4>
+                    <div
+                      style={{ flex: 'auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <h4>Final Ranking</h4>
+                      <button
+                        disabled={!resultDetail.finalRanking?.length}
+                        className='btn btn-success'
+                        onClick={downloadReport}>
+                        <i className='fas fa-download' /> Download Laporan
+                      </button>
+                    </div>
                   </div>
                   <div className='card-body'>
                     <table className='table table-hover'>
