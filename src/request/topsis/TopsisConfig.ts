@@ -22,7 +22,12 @@ const TopsisConfig = () => {
     params,
   })
 
-  return { result, resultDetail, topsisReport }
+  const penerima = (): AxiosRequestConfig => ({
+    url: `${API_ENDPOINT}/api/result-pdf`,
+    responseType: 'blob',
+  })
+
+  return { result, resultDetail, topsisReport, penerima }
 }
 
 export default TopsisConfig()

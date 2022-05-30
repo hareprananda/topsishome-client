@@ -1,3 +1,4 @@
+import { AxiosError } from 'axios'
 import React, { useEffect, useState } from 'react'
 import withDashboardLayout from 'src/components/layout/DashboardLayout'
 import { useAppDispatch } from 'src/hook/useRedux'
@@ -75,6 +76,32 @@ const Result = () => {
       })
   }
 
+  const downloadSurat = () => {
+    dispatch(ReducerActions.ui.masterLoader(true))
+    authReq<BlobPart>(TopsisConfig.penerima())
+      .then(res => {
+        const link = document.createElement('a')
+        const fileName = 'SuratPenerima.pdf'
+        link.setAttribute('download', fileName)
+        link.href = URL.createObjectURL(new Blob([res.data]))
+        document.body.appendChild(link)
+        link.click()
+        link.remove()
+      })
+      .catch((err: AxiosError) => {
+        if (err.response?.status === 400 || err.response?.status === 500) {
+          dispatch(
+            ReducerActions.ui.setStatusModal({
+              title: 'Oops',
+              message: 'Something gone wrong',
+              type: 'error',
+            })
+          )
+        }
+      })
+      .finally(() => dispatch(ReducerActions.ui.masterLoader(false)))
+  }
+
   const renderNormalisasiTyped = (
     renderedData: ResultDetail['rawData'] | ResultDetail['normalisasi'] | ResultDetail['normalisasiTerbobot'],
     title: string,
@@ -121,7 +148,12 @@ const Result = () => {
     <div>
       <div className='card'>
         <div className='card-header'>
-          <h3 className='card-title'>Filter</h3>
+          <div className='d-flex justify-content-between'>
+            <h3 className='card-title'>Filter</h3>
+            <button className='btn btn-primary' onClick={downloadSurat}>
+              <i className='fas fa-download' /> Download Surat Penerima
+            </button>
+          </div>
         </div>
         <div className='card-body'>
           <form onSubmit={submitFilter}>
@@ -243,7 +275,7 @@ const Result = () => {
                         disabled={!resultDetail.finalRanking?.length}
                         className='btn btn-success'
                         onClick={downloadReport}>
-                        <i className='fas fa-download' /> Download Laporan
+                        <i className='fas fa-download' /> Download Laporan Excel
                       </button>
                     </div>
                   </div>
