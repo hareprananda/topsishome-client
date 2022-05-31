@@ -15,6 +15,7 @@ const Result = () => {
   const [allCriteria, setAllCriteria] = useState<Pick<Criteria, '_id' | 'name'>[]>([])
   const [allBanjar, setAllBanjar] = useState<Banjar[]>([])
   const [savedFilter, setSavedFilter] = useState<{ banjar?: string; year?: string }>({})
+  const [tahunPenerima, setTahunPenerima] = useState(new Date().getFullYear())
   const dispatch = useAppDispatch()
   const { authReq } = useRequest()
 
@@ -40,6 +41,9 @@ const Result = () => {
       })
       .catch(() => null)
     requestResultDetail()
+
+    const currentYear = new Date().getFullYear()
+    setTahunPenerima(currentYear - 1)
   }, [])
 
   const submitFilter = (e: React.FormEvent<HTMLFormElement>) => {
@@ -78,7 +82,7 @@ const Result = () => {
 
   const downloadSurat = () => {
     dispatch(ReducerActions.ui.masterLoader(true))
-    authReq<BlobPart>(TopsisConfig.penerima())
+    authReq<BlobPart>(TopsisConfig.penerima({ year: tahunPenerima.toString() }))
       .then(res => {
         const link = document.createElement('a')
         const fileName = 'SuratPenerima.pdf'
@@ -148,11 +152,35 @@ const Result = () => {
     <div>
       <div className='card'>
         <div className='card-header'>
+          <h3 className='card-title'>Download Surat Penerima</h3>
+        </div>
+        <div className='card-body'>
+          <select
+            value={tahunPenerima}
+            onChange={e => setTahunPenerima(parseInt(e.target.value))}
+            className='custom-select'>
+            <option value=''>Data Terbaru</option>
+            {(() => {
+              const currentDate = new Date().getFullYear()
+              const optionEl: JSX.Element[] = []
+              for (let i = currentDate; i >= currentDate - 4; i--)
+                optionEl.push(
+                  <option key={i} value={i}>
+                    {i}
+                  </option>
+                )
+              return optionEl
+            })()}
+          </select>
+          <button className='btn btn-primary mt-2' onClick={downloadSurat}>
+            <i className='fas fa-download' /> Download Surat Penerima
+          </button>
+        </div>
+      </div>
+      <div className='card'>
+        <div className='card-header'>
           <div className='d-flex justify-content-between'>
             <h3 className='card-title'>Filter</h3>
-            <button className='btn btn-primary' onClick={downloadSurat}>
-              <i className='fas fa-download' /> Download Surat Penerima
-            </button>
           </div>
         </div>
         <div className='card-body'>

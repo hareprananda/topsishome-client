@@ -22,9 +22,10 @@ const TopsisConfig = () => {
     params,
   })
 
-  const penerima = (): AxiosRequestConfig => ({
+  const penerima = (params: { year: string }): AxiosRequestConfig => ({
     url: `${API_ENDPOINT}/api/result-pdf`,
     responseType: 'blob',
+    params,
   })
 
   return { result, resultDetail, topsisReport, penerima }
