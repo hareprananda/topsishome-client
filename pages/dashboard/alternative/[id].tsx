@@ -6,7 +6,7 @@ import withDashboardLayout from 'src/components/layout/DashboardLayout'
 import AlternativeDetail from 'src/components/page/alternative/AlternativeDetail'
 import AlternativeForm, { PengajuanDetail } from 'src/components/page/alternative/AlternativeForm'
 import { API_ENDPOINT } from 'src/const/Global'
-import { useAppDispatch } from 'src/hook/useRedux'
+import { useAppDispatch, useAppSelector } from 'src/hook/useRedux'
 import useRequest from 'src/hook/useRequest'
 import ReducerActions from 'src/redux/ReducerAction'
 
@@ -29,6 +29,8 @@ const DetailAlternative: NextPageWithLayout<Props> = ({ id: altId }) => {
   const [mode, setMode] = useState<'view' | 'edit'>(edit ? 'edit' : 'view')
   const dispatch = useAppDispatch()
   const { authReq } = useRequest()
+  const account = useAppSelector(state => state.account)
+
   useEffect(() => {
     dispatch(ReducerActions.ui.masterLoader(true))
     authReq<{ data: PengajuanDetail }>({
@@ -62,19 +64,23 @@ const DetailAlternative: NextPageWithLayout<Props> = ({ id: altId }) => {
               Detail
             </div>
           </li>
-          <li className='nav-item'>
-            <div
-              className={`nav-link ${mode === 'edit' ? 'active' : ''}`}
-              onClick={() => setMode('edit')}
-              style={{ cursor: 'pointer' }}>
-              Update
-            </div>
-          </li>
+          {account.level === 'administrator' && (
+            <li className='nav-item'>
+              <div
+                className={`nav-link ${mode === 'edit' ? 'active' : ''}`}
+                onClick={() => setMode('edit')}
+                style={{ cursor: 'pointer' }}>
+                Update
+              </div>
+            </li>
+          )}
         </ul>
       </div>
       <div className='card-body'>
         {mode === 'edit' ? (
-          <AlternativeForm pengajuan={pengajuanData} setPengajuan={setPengajuanData} />
+          account.level === 'administrator' ? (
+            <AlternativeForm pengajuan={pengajuanData} setPengajuan={setPengajuanData} />
+          ) : null
         ) : (
           <AlternativeDetail pengajuan={pengajuanData} />
         )}

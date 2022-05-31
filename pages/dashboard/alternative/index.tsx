@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { NextPageWithLayout } from 'pages/_app'
 import withDashboardLayout from 'src/components/layout/DashboardLayout'
-import { useAppDispatch } from 'src/hook/useRedux'
+import { useAppDispatch, useAppSelector } from 'src/hook/useRedux'
 import ReducerActions from 'src/redux/ReducerAction'
 import useRequest from 'src/hook/useRequest'
 import { API_ENDPOINT } from 'src/const/Global'
@@ -41,6 +41,7 @@ const Alternative: NextPageWithLayout = () => {
   const [openUploadModal, setOpenUploadModal] = useState(false)
   const [uploadedFileName, setUploadedFileName] = useState('')
   const [searchFilter, setSearchFilter] = useState<Record<string, string>>({})
+  const account = useAppSelector(state => state.account)
 
   useEffect(() => {
     if (!openUploadModal) {
@@ -194,20 +195,24 @@ const Alternative: NextPageWithLayout = () => {
             <i className='fas fa-search' /> Search
           </button>
         </form>
-        <Link href={Route.AlternativeAdd}>
-          <a className='btn btn-success d-flex' style={{ alignItems: 'center', flexShrink: 0 }}>
-            <i className='fas fa-plus' />
-            <p className='m-0 ml-2'>Tambah Alternatif</p>
-          </a>
-        </Link>
+        {account.level === 'administrator' && (
+          <>
+            <Link href={Route.AlternativeAdd}>
+              <a className='btn btn-success d-flex' style={{ alignItems: 'center', flexShrink: 0 }}>
+                <i className='fas fa-plus' />
+                <p className='m-0 ml-2'>Tambah Alternatif</p>
+              </a>
+            </Link>
 
-        <button
-          className='btn btn-primary d-flex ml-1'
-          onClick={() => setOpenUploadModal(true)}
-          style={{ alignItems: 'center', flexShrink: 0 }}>
-          <i className='fas fa-upload' />
-          <p className='m-0 ml-2'>Upload Excel</p>
-        </button>
+            <button
+              className='btn btn-primary d-flex ml-1'
+              onClick={() => setOpenUploadModal(true)}
+              style={{ alignItems: 'center', flexShrink: 0 }}>
+              <i className='fas fa-upload' />
+              <p className='m-0 ml-2'>Upload Excel</p>
+            </button>
+          </>
+        )}
       </div>
       <div className='card-body'>
         <table className='table'>
@@ -218,9 +223,11 @@ const Alternative: NextPageWithLayout = () => {
               <th scope='col'>Alamat</th>
               <th scope='col'>Umur</th>
               <th scope='col'>Jenis Kelamin</th>
-              <th scope='col d-flex justify-content-end' style={{ textAlign: 'right' }}>
-                Action
-              </th>
+              {account.level === 'administrator' && (
+                <th scope='col d-flex justify-content-end' style={{ textAlign: 'right' }}>
+                  Action
+                </th>
+              )}
             </tr>
           </thead>
           <tbody>
@@ -235,20 +242,24 @@ const Alternative: NextPageWithLayout = () => {
                 <td>{alternative.alamat}</td>
                 <td>{alternative.umur}</td>
                 <td>{alternative.jenisKelamin}</td>
-                <td>
-                  <div className='d-flex justify-content-end'>
-                    <Link href={Route.AlternativeDetail(alternative._id) + '?edit=1'}>
-                      <a className='btn btn-warning text-white'>
-                        <i className='fas fa-edit mr-1' /> Edit
-                      </a>
-                    </Link>
-                    <button className='btn btn-danger text-white ml-2' onClick={() => deleteConfirmation(alternative)}>
-                      {' '}
-                      <i className='fas fa-trash mr-1' />
-                      Hapus
-                    </button>
-                  </div>
-                </td>
+                {account.level === 'administrator' && (
+                  <td>
+                    <div className='d-flex justify-content-end'>
+                      <Link href={Route.AlternativeDetail(alternative._id) + '?edit=1'}>
+                        <a className='btn btn-warning text-white'>
+                          <i className='fas fa-edit mr-1' /> Edit
+                        </a>
+                      </Link>
+                      <button
+                        className='btn btn-danger text-white ml-2'
+                        onClick={() => deleteConfirmation(alternative)}>
+                        {' '}
+                        <i className='fas fa-trash mr-1' />
+                        Hapus
+                      </button>
+                    </div>
+                  </td>
+                )}
               </tr>
             ))}
           </tbody>

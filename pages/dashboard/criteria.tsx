@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import withDashboardLayout from 'src/components/layout/DashboardLayout'
 import { API_ENDPOINT } from 'src/const/Global'
-import { useAppDispatch } from 'src/hook/useRedux'
+import { useAppDispatch, useAppSelector } from 'src/hook/useRedux'
 import useRequest from 'src/hook/useRequest'
 import ReducerActions from 'src/redux/ReducerAction'
 import { Criteria } from 'src/request/criteria/Criteria.model'
@@ -15,6 +15,7 @@ const Criteria: NextPageWithLayout = () => {
   const { register, handleSubmit, formState, reset: resetForm, setValue } = useForm<Criteria>({ mode: 'all' })
   const { errors } = formState
   const dispatch = useAppDispatch()
+  const account = useAppSelector(state => state.account)
   const [mode, setMode] = useState<'add' | 'edit'>('add')
 
   useEffect(() => {
@@ -101,7 +102,7 @@ const Criteria: NextPageWithLayout = () => {
 
   return (
     <div className='row'>
-      <div className='col-8 pr-2'>
+      <div className={`${account.level === 'user' ? 'col-12' : 'col-8'} pr-2`}>
         <div className='card'>
           <div className='card-body'>
             <table className='table'>
@@ -110,7 +111,7 @@ const Criteria: NextPageWithLayout = () => {
                   <th scope='col'>Name</th>
                   <th scope='col'>Bobot</th>
                   <th scope='col'>Keterangan</th>
-                  <th scope='col'>Aksi</th>
+                  {account.level === 'administrator' && <th scope='col'>Aksi</th>}
                 </tr>
               </thead>
               <tbody>
@@ -119,18 +120,24 @@ const Criteria: NextPageWithLayout = () => {
                     <td>{criteria.name}</td>
                     <td>{criteria.bobot}</td>
                     <td>{criteria.keterangan}</td>
-                    <td>
-                      <div className='d-flex '>
-                        <button className='btn btn-warning text-white' onClick={() => changeMode('edit', criteria._id)}>
-                          <i className='fas fa-edit mr-1' /> Edit
-                        </button>
-                        <button className='btn btn-danger text-white ml-2' onClick={() => deleteConfirmation(criteria)}>
-                          {' '}
-                          <i className='fas fa-trash mr-1' />
-                          Hapus
-                        </button>
-                      </div>
-                    </td>
+                    {account.level === 'administrator' && (
+                      <td>
+                        <div className='d-flex '>
+                          <button
+                            className='btn btn-warning text-white'
+                            onClick={() => changeMode('edit', criteria._id)}>
+                            <i className='fas fa-edit mr-1' /> Edit
+                          </button>
+                          <button
+                            className='btn btn-danger text-white ml-2'
+                            onClick={() => deleteConfirmation(criteria)}>
+                            {' '}
+                            <i className='fas fa-trash mr-1' />
+                            Hapus
+                          </button>
+                        </div>
+                      </td>
+                    )}
                   </tr>
                 ))}
               </tbody>
@@ -138,55 +145,61 @@ const Criteria: NextPageWithLayout = () => {
           </div>
         </div>
       </div>
-      <div className='col-4 pl-2'>
-        <div className='card '>
-          <div className='card-header'>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <p className='m-0 font-weight-bold'>{mode.slice(0, 1).toUpperCase() + mode.slice(1)} Kriteria</p>
-              {mode === 'edit' && (
-                <button className='btn btn-outline-secondary' onClick={() => changeMode('add')}>
-                  Reset
+      {account.level === 'administrator' && (
+        <div className='col-4 pl-2'>
+          <div className='card '>
+            <div className='card-header'>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <p className='m-0 font-weight-bold'>{mode.slice(0, 1).toUpperCase() + mode.slice(1)} Kriteria</p>
+                {mode === 'edit' && (
+                  <button className='btn btn-outline-secondary' onClick={() => changeMode('add')}>
+                    Reset
+                  </button>
+                )}
+              </div>
+            </div>
+            <div className='card-body'>
+              <form onSubmit={onSubmit}>
+                <div className='form-group'>
+                  <label>Name</label>
+                  <input
+                    className='form-control'
+                    placeholder='Masukkan nama'
+                    {...register('name', { required: true })}
+                  />
+                  {errors.name && <small className='form-text text-danger'>Mohon isi nama dengan benar</small>}
+                </div>
+                <div className='form-group'>
+                  <label>Keterangan</label>
+                  <select
+                    className='form-control'
+                    {...register('keterangan', { required: true, validate: val => !!val })}>
+                    <option value=''>Pilih Keterangan</option>
+                    <option value='cost'>Cost</option>
+                    <option value='benefit'>Benefit</option>
+                  </select>
+                  {errors.keterangan && <small className='form-text text-danger'>Mohon isi keterangan benar</small>}
+                </div>
+                <div className='form-group'>
+                  <label>Bobot</label>
+                  <select className='form-control' {...register('bobot', { required: true, validate: val => !!val })}>
+                    <option value=''>Pilih bobot</option>
+                    {[1, 2, 3, 4, 5].map(val => (
+                      <option value={val} key={val}>
+                        {val}
+                      </option>
+                    ))}
+                  </select>
+                  {errors.bobot && <small className='form-text text-danger'>Mohon isi bobot dengan benar</small>}
+                </div>
+                <button type='submit' className={`btn ${mode === 'add' ? 'btn-primary' : 'btn-success'} btn-block `}>
+                  {mode === 'add' ? 'Tambah' : 'Update'}
                 </button>
-              )}
+              </form>
             </div>
           </div>
-          <div className='card-body'>
-            <form onSubmit={onSubmit}>
-              <div className='form-group'>
-                <label>Name</label>
-                <input className='form-control' placeholder='Masukkan nama' {...register('name', { required: true })} />
-                {errors.name && <small className='form-text text-danger'>Mohon isi nama dengan benar</small>}
-              </div>
-              <div className='form-group'>
-                <label>Keterangan</label>
-                <select
-                  className='form-control'
-                  {...register('keterangan', { required: true, validate: val => !!val })}>
-                  <option value=''>Pilih Keterangan</option>
-                  <option value='cost'>Cost</option>
-                  <option value='benefit'>Benefit</option>
-                </select>
-                {errors.keterangan && <small className='form-text text-danger'>Mohon isi keterangan benar</small>}
-              </div>
-              <div className='form-group'>
-                <label>Bobot</label>
-                <select className='form-control' {...register('bobot', { required: true, validate: val => !!val })}>
-                  <option value=''>Pilih bobot</option>
-                  {[1, 2, 3, 4, 5].map(val => (
-                    <option value={val} key={val}>
-                      {val}
-                    </option>
-                  ))}
-                </select>
-                {errors.bobot && <small className='form-text text-danger'>Mohon isi bobot dengan benar</small>}
-              </div>
-              <button type='submit' className={`btn ${mode === 'add' ? 'btn-primary' : 'btn-success'} btn-block `}>
-                {mode === 'add' ? 'Tambah' : 'Update'}
-              </button>
-            </form>
-          </div>
         </div>
-      </div>
+      )}
     </div>
   )
 }

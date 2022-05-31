@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import withDashboardLayout from 'src/components/layout/DashboardLayout'
 import { API_ENDPOINT } from 'src/const/Global'
-import { useAppDispatch } from 'src/hook/useRedux'
+import { useAppDispatch, useAppSelector } from 'src/hook/useRedux'
 import useRequest from 'src/hook/useRequest'
 import ReducerActions from 'src/redux/ReducerAction'
 import { Banjar } from 'src/request/banjar/Banjar.model'
@@ -14,6 +14,7 @@ const Banjar: NextPageWithLayout = () => {
   const { authReq } = useRequest()
   const { register, handleSubmit, formState, reset: resetForm, setValue } = useForm<Banjar>({ mode: 'all' })
   const { errors } = formState
+  const account = useAppSelector(state => state.account)
   const dispatch = useAppDispatch()
   const [mode, setMode] = useState<'add' | 'edit'>('add')
 
@@ -96,32 +97,34 @@ const Banjar: NextPageWithLayout = () => {
 
   return (
     <div className='row'>
-      <div className='col-8 pr-2'>
+      <div className={`${account.level === 'user' ? 'col-12' : 'col-8'} pr-2`}>
         <div className='card'>
           <div className='card-body'>
             <table className='table'>
               <thead>
                 <tr>
                   <th scope='col'>Name</th>
-                  <th scope='col'>Aksi</th>
+                  {account.level === 'administrator' && <th scope='col'>Aksi</th>}
                 </tr>
               </thead>
               <tbody>
                 {banjarList.map((banjar, idx) => (
                   <tr key={idx}>
                     <td>{banjar.nama}</td>
-                    <td>
-                      <div className='d-flex '>
-                        <button className='btn btn-warning text-white' onClick={() => changeMode('edit', banjar._id)}>
-                          <i className='fas fa-edit mr-1' /> Edit
-                        </button>
-                        <button className='btn btn-danger text-white ml-2' onClick={() => deleteConfirmation(banjar)}>
-                          {' '}
-                          <i className='fas fa-trash mr-1' />
-                          Hapus
-                        </button>
-                      </div>
-                    </td>
+                    {account.level === 'administrator' && (
+                      <td>
+                        <div className='d-flex '>
+                          <button className='btn btn-warning text-white' onClick={() => changeMode('edit', banjar._id)}>
+                            <i className='fas fa-edit mr-1' /> Edit
+                          </button>
+                          <button className='btn btn-danger text-white ml-2' onClick={() => deleteConfirmation(banjar)}>
+                            {' '}
+                            <i className='fas fa-trash mr-1' />
+                            Hapus
+                          </button>
+                        </div>
+                      </td>
+                    )}
                   </tr>
                 ))}
               </tbody>
@@ -129,37 +132,39 @@ const Banjar: NextPageWithLayout = () => {
           </div>
         </div>
       </div>
-      <div className='col-4 pl-2'>
-        <div className='card '>
-          <div className='card-header'>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <p className='m-0 font-weight-bold'>{mode.slice(0, 1).toUpperCase() + mode.slice(1)} Banjar</p>
-              {mode === 'edit' && (
-                <button className='btn btn-outline-secondary' onClick={() => changeMode('add')}>
-                  Reset
+      {account.level === 'administrator' && (
+        <div className='col-4 pl-2'>
+          <div className='card '>
+            <div className='card-header'>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <p className='m-0 font-weight-bold'>{mode.slice(0, 1).toUpperCase() + mode.slice(1)} Banjar</p>
+                {mode === 'edit' && (
+                  <button className='btn btn-outline-secondary' onClick={() => changeMode('add')}>
+                    Reset
+                  </button>
+                )}
+              </div>
+            </div>
+            <div className='card-body'>
+              <form onSubmit={onSubmit}>
+                <div className='form-group'>
+                  <label>Nama Banjar</label>
+                  <input
+                    className='form-control'
+                    placeholder='Masukkan nama banjar'
+                    {...register('nama', { required: true })}
+                  />
+                  {errors.nama && <small className='form-text text-danger'>Mohon isi nama banjar dengan benar</small>}
+                </div>
+
+                <button type='submit' className={`btn ${mode === 'add' ? 'btn-primary' : 'btn-success'} btn-block `}>
+                  {mode === 'add' ? 'Tambah' : 'Update'}
                 </button>
-              )}
+              </form>
             </div>
           </div>
-          <div className='card-body'>
-            <form onSubmit={onSubmit}>
-              <div className='form-group'>
-                <label>Nama Banjar</label>
-                <input
-                  className='form-control'
-                  placeholder='Masukkan nama banjar'
-                  {...register('nama', { required: true })}
-                />
-                {errors.nama && <small className='form-text text-danger'>Mohon isi nama banjar dengan benar</small>}
-              </div>
-
-              <button type='submit' className={`btn ${mode === 'add' ? 'btn-primary' : 'btn-success'} btn-block `}>
-                {mode === 'add' ? 'Tambah' : 'Update'}
-              </button>
-            </form>
-          </div>
         </div>
-      </div>
+      )}
     </div>
   )
 }
