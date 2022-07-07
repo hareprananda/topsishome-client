@@ -9,6 +9,7 @@ import { Criteria } from 'request/criteria/Criteria.model'
 import CriteriaConfig from 'src/request/criteria/CriteriaConfig'
 import BanjarConfig from 'src/request/banjar/BanjarConfig'
 import { Banjar } from 'src/request/banjar/Banjar.model'
+import { houseCondition } from './AlternativeDetail'
 
 export interface PengajuanDetail {
   _id: string
@@ -162,7 +163,7 @@ const AlternativeForm: React.FC<Props> = ({ pengajuan, setPengajuan }) => {
             {errors.alamat && <small className='form-text text-danger'>Mohon isi alamat dengan benar</small>}
           </div>
         </div>
-        <div className='row align-middle' style={{ alignItems: 'center' }}>
+        <div className='row border-bottom align-middle' style={{ alignItems: 'center' }}>
           <div className='col-4 text-left p-3 font-weight-bold'>Banjar :</div>
           <div className='col-8 text-left p-3'>
             <select className='custom-select' {...register('idBanjar', { required: true, validate: value => !!value })}>
@@ -273,19 +274,31 @@ const AlternativeForm: React.FC<Props> = ({ pengajuan, setPengajuan }) => {
                         <select
                           className='custom-select'
                           {...register(`criteria${criteria.id}-${cr.year}`, { required: true })}>
-                          <option value='1'>Sangat Buruk</option>
-                          <option value='2'>Buruk</option>
-                          <option value='3'>Cukup</option>
-                          <option value='4'>Baik</option>
-                          <option value='5'>Sangat Baik</option>
+                          {houseCondition.map((v, idx) => (
+                            <option key={idx} value={idx + 1}>
+                              {v}
+                            </option>
+                          ))}
                         </select>
                       ) : (
-                        <input
-                          type='number'
-                          className='form-control'
-                          placeholder={criteria.name + '...'}
-                          {...register(`criteria${criteria.id}-${cr.year}`, { required: true })}
-                        />
+                        <div className='input-group'>
+                          {criteria.name === 'Penghasilan' && (
+                            <div className='input-group-prepend'>
+                              <div className='input-group-text'>Rp</div>
+                            </div>
+                          )}
+                          <input
+                            type='number'
+                            className='form-control'
+                            placeholder={criteria.name + '...'}
+                            {...register(`criteria${criteria.id}-${cr.year}`, { required: true })}
+                          />
+                          {['Luas Tanah', 'Menerima Bantuan'].includes(criteria.name) && (
+                            <div className='input-group-prepend'>
+                              <div className='input-group-text'>{criteria.name === 'Luas Tanah' ? 'm2' : 'kali'}</div>
+                            </div>
+                          )}
+                        </div>
                       )}
                       {errors[`criteria${criteria.id}`] && (
                         <small className='form-text text-danger'>Mohon isi {criteria.name} dengan benar</small>
@@ -331,19 +344,31 @@ const AlternativeForm: React.FC<Props> = ({ pengajuan, setPengajuan }) => {
                   <div className='col-8 text-left p-3'>
                     {criteria.name.toLowerCase() === 'kondisi rumah' ? (
                       <select className='custom-select' {...register(`new-criteria${criteria.id}`, { required: true })}>
-                        <option value='1'>Sangat Buruk</option>
-                        <option value='2'>Buruk</option>
-                        <option value='3'>Cukup</option>
-                        <option value='4'>Baik</option>
-                        <option value='5'>Sangat Baik</option>
+                        {houseCondition.map((v, idx) => (
+                          <option key={idx} value={idx + 1}>
+                            {v}
+                          </option>
+                        ))}
                       </select>
                     ) : (
-                      <input
-                        type='number'
-                        className='form-control'
-                        placeholder={criteria.name + '...'}
-                        {...register(`new-criteria${criteria.id}`, { required: true })}
-                      />
+                      <div className='input-group'>
+                        {criteria.name === 'Penghasilan' && (
+                          <div className='input-group-prepend'>
+                            <div className='input-group-text'>Rp</div>
+                          </div>
+                        )}
+                        <input
+                          type='number'
+                          className='form-control'
+                          placeholder={criteria.name + '...'}
+                          {...register(`new-criteria${criteria.id}`, { required: true })}
+                        />
+                        {['Luas Tanah', 'Menerima Bantuan'].includes(criteria.name) && (
+                          <div className='input-group-prepend'>
+                            <div className='input-group-text'>{criteria.name === 'Luas Tanah' ? 'm2' : 'kali'}</div>
+                          </div>
+                        )}
+                      </div>
                     )}
                     {errors[`new-criteria${criteria.id}`] && (
                       <small className='form-text text-danger'>Mohon isi {criteria.name} dengan benar</small>

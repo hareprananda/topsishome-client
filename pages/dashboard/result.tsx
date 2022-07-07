@@ -1,6 +1,7 @@
 import { AxiosError } from 'axios'
 import React, { useEffect, useState } from 'react'
 import withDashboardLayout from 'src/components/layout/DashboardLayout'
+import { houseCondition } from 'src/components/page/alternative/AlternativeDetail'
 import { useAppDispatch } from 'src/hook/useRedux'
 import useRequest from 'src/hook/useRequest'
 import ReducerActions from 'src/redux/ReducerAction'
@@ -109,7 +110,8 @@ const Result = () => {
   const renderNormalisasiTyped = (
     renderedData: ResultDetail['rawData'] | ResultDetail['normalisasi'] | ResultDetail['normalisasiTerbobot'],
     title: string,
-    roundDecimal: boolean = false
+    roundDecimal: boolean = false,
+    isRawData: boolean = false
   ) => {
     return (
       <div className='card card-default'>
@@ -134,9 +136,25 @@ const Result = () => {
                 <tr key={data._id}>
                   <th scope='row'>{idx + 1}</th>
                   <td>{data.nama}</td>
-                  {data.criteria.map(cr => (
-                    <td key={cr._id}>{roundDecimal ? cr.value.toFixed(5) : cr.value}</td>
-                  ))}
+                  {data.criteria.map(cr => {
+                    let printed: any = ''
+                    if (!isRawData) printed = roundDecimal ? cr.value.toFixed(5) : cr.value
+                    else {
+                      if (cr.name === 'Luas Tanah')
+                        printed = (
+                          <div style={{ display: 'flex', gap: '3px' }}>
+                            <p className='m-0'>{cr.value}</p>{' '}
+                            <div style={{ display: 'flex' }}>
+                              m{<div style={{ fontSize: '10px', transform: 'translate(0, 0)' }}>2</div>}
+                            </div>
+                          </div>
+                        )
+                      else if (cr.name === 'Kondisi Rumah') printed = <>{houseCondition[cr.value - 1]}</>
+                      else if (cr.name === 'Menerima Bantuan') printed = <>{cr.value} kali</>
+                      else if (cr.name === 'Penghasilan') printed = <>Rp{cr.value.toLocaleString('en')}</>
+                    }
+                    return <td key={cr._id}>{printed}</td>
+                  })}
                 </tr>
               ))}
             </tbody>
@@ -237,7 +255,7 @@ const Result = () => {
           <div className='card-body'>
             <div className='tab-content'>
               <div className='tab-pane active' id='tab_1'>
-                {renderNormalisasiTyped(rawData, 'Data Perhitungan')}
+                {renderNormalisasiTyped(rawData, 'Data Perhitungan', false, true)}
                 {renderNormalisasiTyped(normalisasi, 'Normalisasi Data', true)}
                 {renderNormalisasiTyped(normalisasiTerbobot, 'Normalisasi Terbobot', true)}
                 <div className='card card-default'>

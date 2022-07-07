@@ -5,6 +5,8 @@ interface Props {
   pengajuan: PengajuanDetail
 }
 
+export const houseCondition = ['Sangat Tidak Baik', 'Tidak Baik', 'Cukup Baik', 'Baik', 'Sangat baik']
+
 const AlternativeDetail: React.FC<Props> = ({ pengajuan }) => {
   return (
     <div>
@@ -63,12 +65,27 @@ const AlternativeDetail: React.FC<Props> = ({ pengajuan }) => {
             id={`nav-tab${cr.year}`}
             role='tabpanel'
             aria-labelledby='nav-home-tab'>
-            {cr.criteria?.map(criteria => (
-              <div className='row border-bottom' key={criteria.id}>
-                <div className='col-4 text-left p-3 font-weight-bold'>{criteria.name} :</div>
-                <div className='col-8 text-left p-3'>{criteria.value}</div>
-              </div>
-            ))}
+            {cr.criteria?.map(criteria => {
+              let printed = <>{criteria.value}</>
+              if (criteria.name === 'Luas Tanah')
+                printed = (
+                  <div style={{ display: 'flex', gap: '3px' }}>
+                    <p className='m-0'>{criteria.value}</p>{' '}
+                    <div style={{ display: 'flex' }}>
+                      m{<div style={{ fontSize: '10px', transform: 'translate(0, 0)' }}>2</div>}
+                    </div>
+                  </div>
+                )
+              else if (criteria.name === 'Kondisi Rumah') printed = <>{houseCondition[criteria.value - 1]}</>
+              else if (criteria.name === 'Menerima Bantuan') printed = <>{criteria.value} kali</>
+              else if (criteria.name === 'Penghasilan') printed = <>Rp{criteria.value.toLocaleString('en')} per bulan</>
+              return (
+                <div className='row border-bottom' key={criteria.id}>
+                  <div className='col-4 text-left p-3 font-weight-bold'>{criteria.name} :</div>
+                  <div className='col-8 text-left p-3'>{printed}</div>
+                </div>
+              )
+            })}
           </div>
         ))}
       </div>
