@@ -38,6 +38,15 @@ const Index: NextPageWithLayout = () => {
     options: {
       maintainAspectRatio: false,
       responsive: true,
+      plugins: {
+        legend: {
+          labels: {
+            font: {
+              size: 18,
+            },
+          },
+        },
+      },
     },
   })
 
@@ -74,9 +83,7 @@ const Index: NextPageWithLayout = () => {
     const colorArray = ['#007bff', '#6c757d', '#28a745', '#dc3545', '#ffc107', '#17a2b8', '#343a40']
     const backgroundColor: typeof bigTenChart['data']['datasets'][number]['backgroundColor'] =
       chartType === 'pie'
-        ? Object.keys(bigTenChart.data.datasets[0].data).map(
-            () => colorArray[Math.floor(Math.random() * colorArray.length)]
-          )
+        ? Object.keys(bigTenChart.data.datasets[0].data).map((_, idx) => colorArray[idx % colorArray.length])
         : colorArray[0]
     updateChart({
       type: chartType,
@@ -118,7 +125,7 @@ const Index: NextPageWithLayout = () => {
     if (!bigTenChart) return
     const colorArray = ['#007bff', '#6c757d', '#28a745', '#dc3545', '#ffc107', '#17a2b8', '#343a40']
     bigTenChart.data.datasets[0].backgroundColor = Object.keys(bigTenChartData).map(
-      () => colorArray[Math.floor(Math.random() * colorArray.length)]
+      (_, idx) => colorArray[idx % colorArray.length]
     )
     bigTenChart.data.labels = Object.keys(bigTenChartData)
     bigTenChart.data.datasets[0].data = Object.values(bigTenChartData)
@@ -138,7 +145,9 @@ const Index: NextPageWithLayout = () => {
         <div className='col-12'>
           <div className='card card-default'>
             <div className='card-header'>
-              <h4 className='card-title font-weight-bold'>Penerima per banjar</h4>
+              <h4 className='card-title font-weight-bold' style={{ fontSize: '25px' }}>
+                Penerima per banjar
+              </h4>
               <div className='card-tools'>
                 <button className='btn btn-primary' onClick={() => setChartType(chartType === 'bar' ? 'pie' : 'bar')}>
                   {chartType === 'bar' ? 'Pie' : 'Bar'} Chart
@@ -153,7 +162,9 @@ const Index: NextPageWithLayout = () => {
       </div>
       <div className='card card-default'>
         <div className='card-header'>
-          <h4 className='card-title font-weight-bold'>Final Rankings</h4>
+          <h4 className='card-title font-weight-bold' style={{ fontSize: '25px' }}>
+            Final Rankings
+          </h4>
           <div className='card-tools d-flex'>
             <select
               defaultValue={''}

@@ -152,7 +152,7 @@ const DashboardLayout: React.FC = ({ children }) => {
                 <Link href={Route.Alternative}>
                   <a className={`nav-link ${isMenuActive(Route.Alternative)}`}>
                     <i className='nav-icon fas fa-file-alt'></i>
-                    <p>Data Alternatif</p>
+                    <p>Data Masyarakat</p>
                   </a>
                 </Link>
               </li>
