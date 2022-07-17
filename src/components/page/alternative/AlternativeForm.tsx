@@ -10,6 +10,7 @@ import CriteriaConfig from 'src/request/criteria/CriteriaConfig'
 import BanjarConfig from 'src/request/banjar/BanjarConfig'
 import { Banjar } from 'src/request/banjar/Banjar.model'
 import { houseCondition } from './AlternativeDetail'
+import { luasTanahRangeOption, penghasilanRangeOption } from 'src/helper/RangeHelper'
 
 export interface PengajuanDetail {
   _id: string
@@ -280,6 +281,26 @@ const AlternativeForm: React.FC<Props> = ({ pengajuan, setPengajuan }) => {
                             </option>
                           ))}
                         </select>
+                      ) : criteria.name === 'Luas Tanah' ? (
+                        <select
+                          className='custom-select'
+                          {...register(`criteria${criteria.id}-${cr.year}`, { required: true })}>
+                          {luasTanahRangeOption().map((v, idx) => (
+                            <option key={idx} value={v.value}>
+                              {v.text}
+                            </option>
+                          ))}
+                        </select>
+                      ) : criteria.name === 'Penghasilan' ? (
+                        <select
+                          className='custom-select'
+                          {...register(`criteria${criteria.id}-${cr.year}`, { required: true })}>
+                          {penghasilanRangeOption().map((v, idx) => (
+                            <option key={idx} value={v.value}>
+                              {v.text}
+                            </option>
+                          ))}
+                        </select>
                       ) : (
                         <div className='input-group'>
                           {criteria.name === 'Penghasilan' && (
@@ -293,9 +314,9 @@ const AlternativeForm: React.FC<Props> = ({ pengajuan, setPengajuan }) => {
                             placeholder={criteria.name + '...'}
                             {...register(`criteria${criteria.id}-${cr.year}`, { required: true })}
                           />
-                          {['Luas Tanah', 'Menerima Bantuan'].includes(criteria.name) && (
+                          {['Menerima Bantuan'].includes(criteria.name) && (
                             <div className='input-group-prepend'>
-                              <div className='input-group-text'>{criteria.name === 'Luas Tanah' ? 'm2' : 'kali'}</div>
+                              <div className='input-group-text'>{'kali'}</div>
                             </div>
                           )}
                         </div>
@@ -350,6 +371,22 @@ const AlternativeForm: React.FC<Props> = ({ pengajuan, setPengajuan }) => {
                           </option>
                         ))}
                       </select>
+                    ) : criteria.name === 'Luas Tanah' ? (
+                      <select className='custom-select' {...register(`new-criteria${criteria.id}`, { required: true })}>
+                        {luasTanahRangeOption().map((v, idx) => (
+                          <option key={idx} value={v.value}>
+                            {v.text}
+                          </option>
+                        ))}
+                      </select>
+                    ) : criteria.name === 'Penghasilan' ? (
+                      <select className='custom-select' {...register(`new-criteria${criteria.id}`, { required: true })}>
+                        {penghasilanRangeOption().map((v, idx) => (
+                          <option key={idx} value={v.value}>
+                            {v.text}
+                          </option>
+                        ))}
+                      </select>
                     ) : (
                       <div className='input-group'>
                         {criteria.name === 'Penghasilan' && (
@@ -363,9 +400,9 @@ const AlternativeForm: React.FC<Props> = ({ pengajuan, setPengajuan }) => {
                           placeholder={criteria.name + '...'}
                           {...register(`new-criteria${criteria.id}`, { required: true })}
                         />
-                        {['Luas Tanah', 'Menerima Bantuan'].includes(criteria.name) && (
+                        {['Menerima Bantuan'].includes(criteria.name) && (
                           <div className='input-group-prepend'>
-                            <div className='input-group-text'>{criteria.name === 'Luas Tanah' ? 'm2' : 'kali'}</div>
+                            <div className='input-group-text'>{'kali'}</div>
                           </div>
                         )}
                       </div>

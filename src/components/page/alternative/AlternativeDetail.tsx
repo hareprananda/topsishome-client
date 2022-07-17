@@ -1,4 +1,5 @@
 import React from 'react'
+import { luasTanahRangeOption, penghasilanRangeOption } from 'src/helper/RangeHelper'
 import { PengajuanDetail } from './AlternativeForm'
 
 interface Props {
@@ -58,36 +59,37 @@ const AlternativeDetail: React.FC<Props> = ({ pengajuan }) => {
         </div>
       </nav>
       <div className='tab-content' id='nav-tabContent'>
-        {pengajuan?.criteria?.map((cr, key) => (
-          <div
-            key={key}
-            className={`tab-pane fade ${key === 0 ? 'show active' : ''}`}
-            id={`nav-tab${cr.year}`}
-            role='tabpanel'
-            aria-labelledby='nav-home-tab'>
-            {cr.criteria?.map(criteria => {
-              let printed = <>{criteria.value}</>
-              if (criteria.name === 'Luas Tanah')
-                printed = (
-                  <div style={{ display: 'flex', gap: '3px' }}>
-                    <p className='m-0'>{criteria.value}</p>{' '}
-                    <div style={{ display: 'flex' }}>
-                      m{<div style={{ fontSize: '10px', transform: 'translate(0, 0)' }}>2</div>}
+        {pengajuan?.criteria?.map((cr, key) => {
+          return (
+            <div
+              key={key}
+              className={`tab-pane fade ${key === 0 ? 'show active' : ''}`}
+              id={`nav-tab${cr.year}`}
+              role='tabpanel'
+              aria-labelledby='nav-home-tab'>
+              {cr.criteria?.map(criteria => {
+                let printed = <>{criteria.value}</>
+                if (criteria.name === 'Luas Tanah') {
+                  printed = (
+                    <div style={{ display: 'flex', gap: '3px' }}>
+                      <p className='m-0'>{luasTanahRangeOption()[criteria.value - 1].text}</p>{' '}
                     </div>
+                  )
+                } else if (criteria.name === 'Kondisi Rumah') printed = <>{houseCondition[criteria.value - 1]}</>
+                else if (criteria.name === 'Menerima Bantuan') printed = <>{criteria.value} kali</>
+                else if (criteria.name === 'Penghasilan') {
+                  printed = <>{penghasilanRangeOption()[criteria.value - 1].text} per bulan</>
+                }
+                return (
+                  <div className='row border-bottom' key={criteria.id}>
+                    <div className='col-4 text-left p-3 font-weight-bold'>{criteria.name} :</div>
+                    <div className='col-8 text-left p-3'>{printed}</div>
                   </div>
                 )
-              else if (criteria.name === 'Kondisi Rumah') printed = <>{houseCondition[criteria.value - 1]}</>
-              else if (criteria.name === 'Menerima Bantuan') printed = <>{criteria.value} kali</>
-              else if (criteria.name === 'Penghasilan') printed = <>Rp{criteria.value.toLocaleString('en')} per bulan</>
-              return (
-                <div className='row border-bottom' key={criteria.id}>
-                  <div className='col-4 text-left p-3 font-weight-bold'>{criteria.name} :</div>
-                  <div className='col-8 text-left p-3'>{printed}</div>
-                </div>
-              )
-            })}
-          </div>
-        ))}
+              })}
+            </div>
+          )
+        })}
       </div>
     </div>
   )
