@@ -11,8 +11,10 @@ import { Route } from 'src/const/Route'
 import useChart from 'src/hook/useChart'
 import { Banjar } from 'src/request/banjar/Banjar.model'
 import BanjarConfig from 'src/request/banjar/BanjarConfig'
+import ChartDataLabels from 'chartjs-plugin-datalabels'
 
 const Index: NextPageWithLayout = () => {
+  const colorArray = ['#007bff', '#6c757d', '#28a745', '#dc3545', '#ffc107', '#17a2b8', '#343a40']
   const maxPerPage = useMemo(() => 20, [])
   const [result, setResult] = useState<Result[]>([])
   const [bigTen, setBigTen] = useState<Result[]>([])
@@ -35,15 +37,27 @@ const Index: NextPageWithLayout = () => {
         },
       ],
     },
+    plugins: [ChartDataLabels],
     options: {
       maintainAspectRatio: false,
       responsive: true,
       plugins: {
         legend: {
+          display: true,
+          position: 'left',
+
           labels: {
+            boxWidth: 30,
             font: {
               size: 18,
             },
+          },
+        },
+        datalabels: {
+          color: 'white',
+          anchor: 'center',
+          formatter(value) {
+            return `${value} orang`
           },
         },
       },
@@ -80,7 +94,6 @@ const Index: NextPageWithLayout = () => {
             },
           }
         : {}
-    const colorArray = ['#007bff', '#6c757d', '#28a745', '#dc3545', '#ffc107', '#17a2b8', '#343a40']
     const backgroundColor: typeof bigTenChart['data']['datasets'][number]['backgroundColor'] =
       chartType === 'pie'
         ? Object.keys(bigTenChart.data.datasets[0].data).map((_, idx) => colorArray[idx % colorArray.length])
@@ -127,7 +140,8 @@ const Index: NextPageWithLayout = () => {
     bigTenChart.data.datasets[0].backgroundColor = Object.keys(bigTenChartData).map(
       (_, idx) => colorArray[idx % colorArray.length]
     )
-    bigTenChart.data.labels = Object.keys(bigTenChartData)
+    bigTenChart.data.labels = Object.keys(bigTenChartData).map(v => `Banjar ${v}`)
+
     bigTenChart.data.datasets[0].data = Object.values(bigTenChartData)
     bigTenChart?.update()
   }, [bigTen])
@@ -146,7 +160,7 @@ const Index: NextPageWithLayout = () => {
           <div className='card card-default'>
             <div className='card-header'>
               <h4 className='card-title font-weight-bold' style={{ fontSize: '25px' }}>
-                Penerima per banjar
+                Jumlah penerima bantuan per banjar
               </h4>
               <div className='card-tools'>
                 <button className='btn btn-primary' onClick={() => setChartType(chartType === 'bar' ? 'pie' : 'bar')}>
@@ -155,7 +169,17 @@ const Index: NextPageWithLayout = () => {
               </div>
             </div>
             <div className='card-body'>
-              <canvas id='bigTenChart' style={{ height: '400px' }} />
+              <canvas id='bigTenChart' style={{ height: '400px', flex: 'auto' }} />
+              {/* <div style={{ display: 'flex' }}>
+                <div style={{ width: '200px', flexShrink: 0, paddingLeft: '100px' }}>
+                  {allBanjar.map((banjar, key) => {
+                    return <p key={key}>{banjar.nama}</p>
+                  })}
+                </div>
+                <div style={{ flex: 'auto', overflow: 'hidden' }}>
+                  <canvas id='bigTenChart' style={{ height: '400px', flex: 'auto' }} />
+                </div>
+              </div> */}
             </div>
           </div>
         </div>
